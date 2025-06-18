@@ -41,11 +41,15 @@ function Hero() {
                   Leading the Way in Medical Excellence
                 </div>
               </div>
-              <div className="bg-blue-100 w-fit px-8 py-2 rounded-full cursor-pointer">
+
+              <Link
+                className="block bg-blue-100 w-fit px-8 py-2 rounded-full cursor-pointer"
+                href="/appointment"
+              >
                 Appointment
-              </div>
+              </Link>
             </div>
-            <ImageFallBack w="500px"  />
+            <ImageFallBack w="500px" />
           </div>
         </div>
         <div className="flex lg:translate-y-1/2 lg:gap-10 gap-5 lg:flex-row flex-col px-5 justify-center">

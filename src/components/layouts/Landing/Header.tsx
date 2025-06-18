@@ -3,15 +3,13 @@ import {
   faBars,
   faRightFromBracket,
   faUser,
-  IconDefinition,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useState } from "react";
 
 type navsType = navType[];
 type navType = {
-  key: number;
   text: string | ReactNode;
   link: string;
   popup?: ReactNode | undefined;
@@ -24,31 +22,26 @@ interface navsProps {
 function Header() {
   const arr = [
     {
-      key: 1,
       text: "Home",
       link: "/",
       popup: null,
     },
     {
-      key: 2,
       text: "Services",
       link: "/",
       popup: null,
     },
     {
-      key: 3,
       text: "Contact",
-      link: "/",
+      link: "/contact",
       popup: null,
     },
     {
-      key: 4,
       text: "Other",
       link: "/",
       popup: OthersPopup(),
     },
     {
-      key: 5,
       text: <FontAwesomeIcon icon={faUser} />,
       link: "/",
       popup: UserPopup(),
@@ -93,25 +86,25 @@ function Header() {
 function RenderNav({ navs, withClick = false }: navsProps) {
   const [hovered, setHovered] = useState<number | null>(null);
 
-  const clickNav = (nav: navType) => {
-    hovered === nav.key ? setHovered(null) : setHovered(nav.key);
+  const clickNav = (i: number) => {
+    hovered === i ? setHovered(null) : setHovered(i);
   };
 
   return (
     <>
-      {navs.map((nav) => (
+      {navs.map((nav, i) => (
         <div
           onClick={
             withClick
               ? () => {
-                  clickNav(nav);
+                  clickNav(i);
                 }
               : undefined
           }
           onMouseEnter={
             !withClick
               ? () => {
-                  setHovered(nav.key);
+                  setHovered(i);
                 }
               : undefined
           }
@@ -122,11 +115,19 @@ function RenderNav({ navs, withClick = false }: navsProps) {
                 }
               : undefined
           }
-          className="hover:border-b border-cyan-400 py-8 px-5 cursor-pointer"
-          key={nav.key}
+          key={i}
         >
-          <Link href={nav.link}>{nav.text}</Link>
-          {nav.popup && hovered === nav.key && nav?.popup}
+          <Link
+            className={`block relative  ${
+              hovered === i
+                ? "after:absolute after:h-[2px] after:w-full after:bottom-0 after:left-0 after:bg-cyan-400"
+                : ""
+            }  cursor-pointer py-6 px-5`}
+            href={nav.link}
+          >
+            {nav.text}
+          </Link>
+          {nav.popup && hovered === i && nav?.popup}
         </div>
       ))}
     </>
@@ -135,28 +136,26 @@ function RenderNav({ navs, withClick = false }: navsProps) {
 
 function OthersPopup() {
   const othersMenu = [
-    { key: 1, text: "Appointemnt", icon: null },
-    { key: 2, text: "Internal Medicine", icon: null },
-    { key: 3, text: "About", icon: null },
-    { key: 4, text: "Bones", icon: null },
-    { key: 5, text: "Doctor", icon: null },
-    { key: 6, text: "Blood Bank", icon: null },
-    { key: 7, text: "News", icon: null },
-    { key: 8, text: "Dermalogy", icon: null },
-    { key: 9, text: "Surgery", icon: null },
-    { key: 10, text: "Orthopedic", icon: null },
+    { text: "Appointemnt", icon: null },
+    { text: "Internal Medicine", icon: null },
+    { text: "About", icon: null },
+    { text: "Bones", icon: null },
+    { text: "Doctor", icon: null },
+    { text: "Blood Bank", icon: null },
+    { text: "News", icon: null },
+    { text: "Dermalogy", icon: null },
+    { text: "Surgery", icon: null },
+    { text: "Orthopedic", icon: null },
   ];
   return (
     <div className="z-10 absolute right-0 top-full bg-white p-5 w-full text-black/80 border-b-2 border-cyan-400">
       <div className="grid lg:grid-cols-2 grid-cols-1">
-        {othersMenu.map((item) => (
+        {othersMenu.map((item, i) => (
           <div
-            className={`flex gap-2 py-4 px-2 hover:bg-gray-50 not-last:border-b sm:nth-[${
-              othersMenu.at(-2)?.key
-            }]:border-0 ${
-              item.key % 2 === 0 ? "lg:ml-8 ml-0" : ""
-            } border-gray-200`}
-            key={item.key}
+            className={`flex gap-2 py-4 px-2 hover:bg-gray-50 not-last:border-b ${
+              othersMenu.at(-2) === item ? `sm:nth-[${i + 1}]:border-0` : ""
+            } ${(i + 1) % 2 === 0 ? "lg:ml-8 ml-0" : ""} border-gray-200`}
+            key={i}
           >
             {item.icon}
             {item.text}
@@ -168,11 +167,19 @@ function OthersPopup() {
 }
 function UserPopup() {
   const userMenu = [
-    { key: 1, text: "Profile", icon: <FontAwesomeIcon icon={faUser} /> },
+    {
+      key: 1,
+      text: "Profile",
+      icon: <FontAwesomeIcon icon={faUser} />,
+      link: "/profile",
+    },
     {
       key: 2,
       text: "Logout",
-      icon: <FontAwesomeIcon icon={faRightFromBracket} />,
+      icon: (
+        <FontAwesomeIcon className="text-red-600" icon={faRightFromBracket} />
+      ),
+      link: "logout",
     },
   ];
   return (
@@ -180,10 +187,13 @@ function UserPopup() {
       <div className="flex flex-col gap-4">
         {userMenu.map((menuItem) => (
           <div key={menuItem.key} className="hover:bg-gray-50 transition">
-            <div className="flex items-center gap-2 p-5">
+            <Link
+              href={menuItem.link}
+              className="flex items-center gap-2 p-5 cursor-pointer"
+            >
               {menuItem.icon}
               {menuItem.text}
-            </div>
+            </Link>
           </div>
         ))}
       </div>
