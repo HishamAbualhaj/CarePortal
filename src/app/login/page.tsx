@@ -14,7 +14,7 @@ function page() {
         <div className="flex-1 bg-blue-100 flex justify-center items-center relative max-xl:hidden">
           <div className="text-2xl bg-white p-5 max-w-[550px] rounded-md leading-[35px] shadow-main">
             " Its important to take care of your
-            <span className="text-blue-500"> health</span> even if you seem
+            <span className="text-blue-500">health</span> even if you seem
             healty "
           </div>
         </div>
