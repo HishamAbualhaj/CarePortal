@@ -1,4 +1,5 @@
 "use client";
+import ActionButtons from "@/components/layouts/dashboard/ActionButtons";
 import AdminPanel from "@/components/layouts/dashboard/AdminPanel";
 import SideBar from "@/components/layouts/dashboard/SideBar";
 import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -23,21 +24,29 @@ function ClientMessages({ data }: { data: any[] }) {
               { key: "action", label: "Actions" },
             ]}
             panelTitle="Messages"
-            data={[]}
-            customAction={() => {
-              return (
-                <div className="flex gap-2 justify-center items-center">
-                  <FontAwesomeIcon
-                    className="text-gray-400 bg-gray-200 p-2 rounded-md cursor-pointer hover:bg-gray-500 hover:text-white transition"
-                    icon={faPen}
-                  />
-                  <FontAwesomeIcon
-                    className="text-red-500 bg-gray-200 p-2 rounded-md cursor-pointer hover:bg-gray-500 hover:text-white transition"
-                    icon={faTrash}
-                  />
-                </div>
-              );
-            }}
+            data={[{ id: "1" }]}
+            customAction={(item, setPopUp, tablePopup) => (
+              <ActionButtons
+                item={item}
+                tablePopup={tablePopup}
+                setPopUp={setPopUp}
+                btns={["edit", "delete"]}
+              />
+            )}
+            tablePopup={[
+              {
+                popupTitle: "Delete Message",
+                popupContent: "Are you sure you want to delete this message?",
+                popupActionText: "Delete",
+                popupAction: () => {},
+              },
+              {
+                popupTitle: "Edit Message",
+                popupContent: [{ text: "", item: "", data: "" }],
+                popupActionText: "Edit",
+                popupAction: () => {},
+              },
+            ]}
             filterContent={(handleChange, idChange) => (
               <>
                 <input

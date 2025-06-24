@@ -4,6 +4,7 @@ import AdminPanel from "@/components/layouts/dashboard/AdminPanel";
 import SideBar from "@/components/layouts/dashboard/SideBar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import ActionButtons from "@/components/layouts/dashboard/ActionButtons";
 function ClientContacts({ data }: { data: any[] }) {
   return (
     <div className="flex h-screen">
@@ -22,17 +23,23 @@ function ClientContacts({ data }: { data: any[] }) {
               { key: "action", label: "Actions" },
             ]}
             panelTitle="All Contacts Messages"
-            data={[]}
-            customAction={() => {
-              return (
-                <div className="flex gap-2 justify-center items-center">
-                  <FontAwesomeIcon
-                    className="text-red-500 bg-gray-200 p-2 rounded-md cursor-pointer hover:bg-gray-500 hover:text-white transition"
-                    icon={faTrash}
-                  />
-                </div>
-              );
-            }}
+            data={[{ id: "1" }]}
+            customAction={(item, setPopUp, tablePopup) => (
+              <ActionButtons
+                item={item}
+                tablePopup={tablePopup}
+                setPopUp={setPopUp}
+                btns={["delete"]}
+              />
+            )}
+            tablePopup={[
+              {
+                popupTitle: "Delete Contact",
+                popupContent: "Are you sure you want to delete this contact?",
+                popupActionText: "Delete",
+                popupAction: () => {},
+              },
+            ]}
             filterContent={(handleChange, idChange) => (
               <>
                 <input

@@ -1,4 +1,5 @@
 "use client";
+import ActionButtons from "@/components/layouts/dashboard/ActionButtons";
 import AdminPanel from "@/components/layouts/dashboard/AdminPanel";
 import SideBar from "@/components/layouts/dashboard/SideBar";
 import { faPen, faTrash, faUser } from "@fortawesome/free-solid-svg-icons";
@@ -61,25 +62,35 @@ function ClientNews({ data }: { data: any[] }) {
             ]}
             panelTitle="News"
             btnText="Add News"
-            popupTitle="Add News"
-            popupAction={() => {}}
-            popupContent={items}
-            popupActionText="Add"
-            data={data}
-            customAction={() => {
-              return (
-                <div className="flex gap-2 justify-center items-center">
-                  <FontAwesomeIcon
-                    className="text-gray-400 bg-gray-200 p-2 rounded-md cursor-pointer hover:bg-gray-500 hover:text-white transition"
-                    icon={faPen}
-                  />
-                  <FontAwesomeIcon
-                    className="text-red-500 bg-gray-200 p-2 rounded-md cursor-pointer hover:bg-gray-500 hover:text-white transition"
-                    icon={faTrash}
-                  />
-                </div>
-              );
+            mainPopup={{
+              popupTitle: "Add News",
+              popupContent: items,
+              popupActionText: "Add",
+              popupAction: () => {},
             }}
+            data={[{ id: "1" }]}
+            customAction={(item, setPopUp, tablePopup) => (
+              <ActionButtons
+                item={item}
+                tablePopup={tablePopup}
+                setPopUp={setPopUp}
+                btns={["edit", "delete"]}
+              />
+            )}
+            tablePopup={[
+              {
+                popupTitle: "Delete News",
+                popupContent: "Are you sure you want to delete this news?",
+                popupActionText: "Delete",
+                popupAction: () => {},
+              },
+              {
+                popupTitle: "Edit News",
+                popupContent: items,
+                popupActionText: "Edit",
+                popupAction: () => {},
+              },
+            ]}
             filterContent={(handleChange, idChange) => (
               <>
                 <input

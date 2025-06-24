@@ -2,8 +2,9 @@
 import React from "react";
 import AdminPanel from "@/components/layouts/dashboard/AdminPanel";
 import SideBar from "@/components/layouts/dashboard/SideBar";
-import { faUser } from "@fortawesome/free-solid-svg-icons";
+import { faPen, faTrash, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ActionButtons from "@/components/layouts/dashboard/ActionButtons";
 function ClientUsers({ data }: { data: any[] }) {
   const items = [
     {
@@ -120,14 +121,38 @@ function ClientUsers({ data }: { data: any[] }) {
               { key: "status", label: "Status" },
               { key: "birthday", label: "Birthday" },
               { key: "diseases", label: "Diseases" },
-              { key: "delete", label: "Actions" },
+              { key: "action", label: "Actions" },
+            ]}
+            customAction={(item, setPopUp, tablePopup) => (
+              <ActionButtons
+                item={item}
+                tablePopup={tablePopup}
+                setPopUp={setPopUp}
+                btns={["edit", "delete"]}
+              />
+            )}
+            tablePopup={[
+              {
+                popupTitle: "Delete User",
+                popupContent: "Are you sure you want to delete this user?",
+                popupActionText: "Delete",
+                popupAction: () => {},
+              },
+              {
+                popupTitle: "Edit User",
+                popupContent: items,
+                popupActionText: "Edit",
+                popupAction: () => {},
+              },
             ]}
             btnText="Add User"
-            popupTitle={"Add User"}
-            popupContent={items}
-            popupActionText={"Add"}
-            popupAction={() => {}}
-            data={data}
+            mainPopup={{
+              popupTitle: "Add User",
+              popupContent: items,
+              popupActionText: "Add",
+              popupAction: () => {},
+            }}
+            data={[{ id: "1" }]}
             panelTitle="Users"
             filterContent={(handleChange, idChange) => (
               <>
@@ -144,7 +169,13 @@ function ClientUsers({ data }: { data: any[] }) {
                   placeholder="Username"
                   type="text"
                 />
-                <select className={`${idChange ? "opacity-50" : ""}`} disabled={idChange} onChange={handleChange} name="" id="">
+                <select
+                  className={`${idChange ? "opacity-50" : ""}`}
+                  disabled={idChange}
+                  onChange={handleChange}
+                  name=""
+                  id=""
+                >
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                 </select>

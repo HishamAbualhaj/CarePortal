@@ -4,6 +4,8 @@ import AdminPanel from "@/components/layouts/dashboard/AdminPanel";
 import SideBar from "@/components/layouts/dashboard/SideBar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
+import ActionButtons from "@/components/layouts/dashboard/ActionButtons";
+import { PopupProps } from "@/types/AdminPanelProps";
 function ClientAppointments({ data }: { data: any[] }) {
   const items = [
     {
@@ -62,27 +64,38 @@ function ClientAppointments({ data }: { data: any[] }) {
               { key: "message", label: "Message" },
               { key: "action", label: "Actions" },
             ]}
-            customAction={() => {
-              return (
-                <div className="flex gap-2 justify-center items-center">
-                  <FontAwesomeIcon
-                    className="text-gray-400 bg-gray-200 p-2 rounded-md cursor-pointer hover:bg-gray-500 hover:text-white transition"
-                    icon={faPen}
-                  />
-                  <FontAwesomeIcon
-                    className="text-red-500 bg-gray-200 p-2 rounded-md cursor-pointer hover:bg-gray-500 hover:text-white transition"
-                    icon={faTrash}
-                  />
-                </div>
-              );
-            }}
+            customAction={(item, setPopUp, tablePopup) => (
+              <ActionButtons
+                item={item}
+                tablePopup={tablePopup}
+                setPopUp={setPopUp}
+                btns={["edit", "delete"]}
+              />
+            )}
+            tablePopup={[
+              {
+                popupTitle: "Delete Appointment",
+                popupContent:
+                  "Are you sure you want to delete this appointment?",
+                popupActionText: "Delete",
+                popupAction: () => {},
+              },
+              {
+                popupTitle: "Edit Appointment",
+                popupContent: items,
+                popupActionText: "Edit",
+                popupAction: () => {},
+              },
+            ]}
             panelTitle="All Appointments"
             btnText="Add Appointment"
-            popupTitle="Add Appointment"
-            popupContent={items}
-            popupActionText="Add"
-            popupAction={() => {}}
-            data={[]}
+            mainPopup={{
+              popupTitle: "Add Appointment",
+              popupContent: items,
+              popupActionText: "Add",
+              popupAction: () => {},
+            }}
+            data={[{ id: "123" }]}
             filterContent={(handleChange, idChange) => (
               <>
                 <input
@@ -98,7 +111,7 @@ function ClientAppointments({ data }: { data: any[] }) {
                   placeholder="Doctor Name"
                   type="text"
                 />
-                 <input
+                <input
                   disabled={idChange}
                   className={`${idChange ? "opacity-50" : ""}`}
                   onChange={handleChange}

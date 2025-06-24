@@ -136,13 +136,15 @@ function ClientDoctors({ data }: { data: any[] }) {
               { key: "years_exp", label: "Years of Experience" },
               { key: "decs", label: "description" },
             ]}
-            btnText="Add Doctor"
-            popupTitle="Add Doctor"
-            popupContent={items}
-            popupActionText="Add"
-            popupAction={() => {}}
-            data={data}
             panelTitle="Doctors"
+            btnText="Add Doctor"
+            mainPopup={{
+              popupTitle: "Add Doctor",
+              popupContent: items,
+              popupActionText: "Add",
+              popupAction: () => {},
+            }}
+            data={data}
             filterContent={(handleChange, idChange) => (
               <>
                 <input
