@@ -1,15 +1,35 @@
-import React, { ReactNode } from "react";
+"use client";
+import React, { ReactNode, useEffect, useState } from "react";
 
 import { tableProps, colType } from "@/types/TableTypes";
+import Popup from "./Popup";
+import { PopupProps } from "@/types/AdminPanelProps";
 
-function Table({ columns, customAction, data }: tableProps) {
+interface ComponentProps extends tableProps {
+  tablePopup?: PopupProps[];
+}
+function Table({ columns, customAction, data, tablePopup }: ComponentProps) {
+  const [isPop, setPopUp] = useState<PopupProps | null>(null);
+
   return (
     <>
+      {isPop && (
+        <Popup
+          popupTitle={isPop.popupTitle}
+          popupContent={isPop.popupContent}
+          popupActionText={isPop.popupActionText}
+          popupAction={isPop.popupAction}
+          setPopup={setPopUp}
+        />
+      )}
       <table className="border border-collapse w-full">
         <thead>
           <tr>
             {columns.map((column: colType, i: number) => (
-              <th key={i} className="font-normal border border-gray-300 p-3 bg-gray-300/30">
+              <th
+                key={i}
+                className="font-normal border border-gray-300 p-3 bg-gray-300/30"
+              >
                 {column.label}
               </th>
             ))}
@@ -31,14 +51,16 @@ function Table({ columns, customAction, data }: tableProps) {
                 )}
                 {customAction && (
                   <td className="border border-gray-300 p-5">
-                    {customAction(item, () => {})}
+                    {customAction(item, setPopUp, tablePopup)}
                   </td>
                 )}
               </tr>
             ))}
         </tbody>
       </table>
-      {!Boolean(data.length) && <div className="text-center text-lg mt-10">No Data Found</div>}
+      {!Boolean(data.length) && (
+        <div className="text-center text-lg mt-10">No Data Found</div>
+      )}
     </>
   );
 }

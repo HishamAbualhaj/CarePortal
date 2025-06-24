@@ -9,33 +9,15 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { ReactNode, useState } from "react";
-import { tableProps, colType } from "@/types/TableTypes";
 import Popup from "@/components/ui/Popup";
-
-interface adminPanelProps extends tableProps {
-  panelTitle: string;
-  btnText?: string;
-  popupTitle?: string;
-  popupContent?: { text: string; item: ReactNode }[];
-  popupActionText?: string;
-  popupAction?: () => void;
-  filterContent?: (
-    handleChange: (
-      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-    ) => void,
-    isChange: boolean
-  ) => ReactNode;
-  filterAction?: () => void;
-}
+import { adminPanelProps, PopupProps } from "@/types/AdminPanelProps";
 function AdminPanel({
   columns,
   customAction,
   panelTitle,
   btnText,
-  popupTitle,
-  popupContent,
-  popupActionText,
-  popupAction,
+  mainPopup,
+  tablePopup,
   data,
   filterContent,
   filterAction,
@@ -43,7 +25,7 @@ function AdminPanel({
   const [filter, setFilter] = useState<boolean>(false);
   const [idChange, setIdChange] = useState<boolean>(false);
 
-  const [isPop, setPopUp] = useState<boolean>(false);
+  const [isPop, setPopUp] = useState<PopupProps | null>(null);
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -61,10 +43,10 @@ function AdminPanel({
       <div className="xl:px-10 px-5">
         {isPop && (
           <Popup
-            title={popupTitle}
-            content={popupContent}
-            actionText={popupActionText}
-            action={popupAction}
+            popupTitle={mainPopup?.popupTitle}
+            popupContent={mainPopup?.popupContent}
+            popupActionText={mainPopup?.popupActionText}
+            popupAction={mainPopup?.popupAction}
             setPopup={setPopUp}
           />
         )}
@@ -77,7 +59,7 @@ function AdminPanel({
                 <Button
                   icon={<FontAwesomeIcon icon={faPlus} />}
                   onClick={() => {
-                    setPopUp(true);
+                    setPopUp({});
                   }}
                   text={btnText}
                 />
@@ -118,6 +100,7 @@ function AdminPanel({
                 columns={columns}
                 customAction={customAction}
                 data={data}
+                tablePopup={tablePopup}
               />
             </div>
             <div className="flex justify-end pt-5">
