@@ -1,8 +1,17 @@
 "use client";
 import {
   faBars,
+  faBone,
+  faCalendarCheck,
+  faDna,
+  faHandSparkles,
+  faHeartPulse,
+  faNewspaper,
+  faNotesMedical,
   faRightFromBracket,
+  faTint,
   faUser,
+  faUserDoctor,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
@@ -28,7 +37,7 @@ function Header() {
     },
     {
       text: "Services",
-      link: "/",
+      link: "/services",
       popup: null,
     },
     {
@@ -55,10 +64,12 @@ function Header() {
   return (
     <div className="max-container px-5 relative">
       <div className="flex justify-between items-center">
-        <div className="flex gap-1 font-bold text-xl">
-          <div className="text-blue-500">Care</div>
-          <div className="text-black">Portal</div>
-        </div>
+        <Link href="/">
+          <div className="flex gap-1 font-bold text-xl">
+            <div className="text-blue-500">Care</div>
+            <div className="text-black">Portal</div>
+          </div>
+        </Link>
 
         <div className="flex max-md:hidden">
           <RenderNav navs={navs} withClick={false} />
@@ -136,30 +147,66 @@ function RenderNav({ navs, withClick = false }: navsProps) {
 
 function OthersPopup() {
   const othersMenu = [
-    { text: "Appointemnt", icon: null },
-    { text: "Internal Medicine", icon: null },
-    { text: "About", icon: null },
-    { text: "Bones", icon: null },
-    { text: "Doctor", icon: null },
-    { text: "Blood Bank", icon: null },
-    { text: "News", icon: null },
-    { text: "Dermalogy", icon: null },
-    { text: "Surgery", icon: null },
-    { text: "Orthopedic", icon: null },
+    {
+      text: "Appointemnt",
+      icon: <FontAwesomeIcon icon={faCalendarCheck} />,
+      link: "/appointment",
+    },
+    {
+      text: "Free Checkup",
+      icon: <FontAwesomeIcon icon={faNotesMedical} />,
+      link: "/services/FreeCheckup",
+    },
+    {
+      text: "Doctors",
+      icon: <FontAwesomeIcon icon={faUserDoctor} />,
+      link: "/doctors",
+    },
+    {
+      text: "Cardiogram",
+      icon: <FontAwesomeIcon icon={faHeartPulse} />,
+      link: "/services/Cardiogram",
+    },
+    {
+      text: "DNA Testing",
+      icon: <FontAwesomeIcon icon={faDna} />,
+      link: "/services/DnaTesting",
+    },
+    {
+      text: "News",
+      icon: <FontAwesomeIcon icon={faNewspaper} />,
+      link: "/news",
+    },
+    {
+      text: "Blood Bank",
+      icon: <FontAwesomeIcon icon={faTint} />,
+      link: "/services/BloodBank",
+    },
+    {
+      text: "Dermatology",
+      icon: <FontAwesomeIcon icon={faHandSparkles} />,
+      link: "/services/Dermatology",
+    },
+    {
+      text: "Orthopedic",
+      icon: <FontAwesomeIcon icon={faBone} />,
+      link: "/services/Orthopedic",
+    },
   ];
   return (
     <div className="z-10 absolute right-0 top-full bg-white p-5 w-full text-black/80 border-b-2 border-cyan-400">
       <div className="grid lg:grid-cols-2 grid-cols-1">
         {othersMenu.map((item, i) => (
-          <div
-            className={`flex gap-2 py-4 px-2 hover:bg-gray-50 not-last:border-b ${
+          <Link
+            href={item.link}
+            className={`flex items-center gap-2 py-4 px-2 hover:bg-gray-50 not-last:border-b ${
               othersMenu.at(-2) === item ? `sm:nth-[${i + 1}]:border-0` : ""
             } ${(i + 1) % 2 === 0 ? "lg:ml-8 ml-0" : ""} border-gray-200`}
             key={i}
           >
-            {item.icon}
+            <div className="text-cyan-500"> {item.icon}</div>
             {item.text}
-          </div>
+          </Link>
         ))}
       </div>
     </div>

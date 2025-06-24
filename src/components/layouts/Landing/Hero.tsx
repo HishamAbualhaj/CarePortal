@@ -7,14 +7,14 @@ function Hero() {
     {
       key: 1,
       text: "Book an Appointment",
-      link: "/",
+      link: "/appointment",
       bgColor: "bg-blue-900",
       textColor: "text-white",
     },
     {
       key: 2,
       text: "Our Latest News",
-      link: "/",
+      link: "/news",
       bgColor: "bg-blue-300",
       textColor: "text-black",
     },
@@ -54,12 +54,13 @@ function Hero() {
         </div>
         <div className="flex lg:translate-y-1/2 lg:gap-10 gap-5 lg:flex-row flex-col px-5 justify-center">
           {buttons.map((btn) => (
-            <div
+            <Link
+              href={btn.link}
               className={`${btn.bgColor} ${btn.textColor} xl:py-8 py-4 px-5 flex-1 rounded-md`}
               key={btn.key}
             >
-              <Link href={btn.link}>{btn.text}</Link>
-            </div>
+              {btn.text}
+            </Link>
           ))}
         </div>
       </div>

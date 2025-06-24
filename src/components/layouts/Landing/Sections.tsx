@@ -1,19 +1,34 @@
 import React from "react";
 import Title from "../../ui/Title";
+import {
+  faBrain,
+  faBone,
+  faRibbon,
+  faEarListen,
+  faEye,
+  faHeartbeat,
+  faLungs,
+  faFlask,
+  faBowlFood,
+  faToilet,
+  faHandSparkles,
+  faVenus,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 function Sections() {
   const sections = [
-    { key: 1, text: "Neurology", icon: null },
-    { key: 2, text: "Bones", icon: null },
-    { key: 3, text: "Oncology", icon: null },
-    { key: 4, text: "Otorhinolaryngology", icon: null },
-    { key: 5, text: "Ophthalmology", icon: null },
-    { key: 6, text: "Cardiovascular", icon: null },
-    { key: 7, text: "Pulmonology", icon: null },
-    { key: 8, text: "Renal Medicine", icon: null },
-    { key: 9, text: "Gastroenterology", icon: null },
-    { key: 10, text: "Urology", icon: null },
-    { key: 11, text: "Dermatology", icon: null },
-    { key: 12, text: "Gynaecology", icon: null },
+    { key: 1, text: "Neurology", icon: faBrain },
+    { key: 2, text: "Bones", icon: faBone },
+    { key: 3, text: "Oncology", icon: faRibbon },
+    { key: 4, text: "Otorhinolaryngology", icon: faEarListen },
+    { key: 5, text: "Ophthalmology", icon: faEye },
+    { key: 6, text: "Cardiovascular", icon: faHeartbeat },
+    { key: 7, text: "Pulmonology", icon: faLungs },
+    { key: 8, text: "Renal Medicine", icon: faFlask },
+    { key: 9, text: "Gastroenterology", icon: faBowlFood },
+    { key: 10, text: "Urology", icon: faToilet },
+    { key: 11, text: "Dermatology", icon: faHandSparkles },
+    { key: 12, text: "Gynaecology", icon: faVenus },
   ];
   return (
     <div className="mx-auto max-w-[992px] text-center px-5">
@@ -22,9 +37,9 @@ function Sections() {
         {sections.map((section) => (
           <div
             key={section.key}
-            className="flex flex-col justify-center items-center border border-gray-300 p-12 text-blue-900"
+            className="flex flex-col gap-3 justify-center items-center border border-gray-300 p-12 text-blue-900"
           >
-            {section.icon}
+            <FontAwesomeIcon className="text-lg text-cyan-500" icon={section.icon} />
             {section.text}
           </div>
         ))}
