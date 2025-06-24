@@ -21,7 +21,7 @@ function Button({
         ${type === "close" ? "bg-gray-200 !text-black hover:bg-gray-300" : ""}
         ${size === "normal" ? "py-2 px-4" : ""} ${
         size === "large" ? "py-3 px-6 text-xl" : ""
-      } py-2 px-4 rounded-md text-center text-white cursor-pointer flex items-center gap-2`}
+      } py-2 px-4 rounded-md text-center text-white cursor-pointer flex items-center gap-2 justify-center`}
     >
       {icon}
       {text}
