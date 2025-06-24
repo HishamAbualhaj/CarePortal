@@ -112,6 +112,7 @@ function page() {
                     Delete
                   </div>
                 )}
+                data={[]}
               />
             </div>
           </div>
@@ -134,6 +135,7 @@ function page() {
                     Delete
                   </div>
                 )}
+                data={[]}
               />
             </div>
           </div>

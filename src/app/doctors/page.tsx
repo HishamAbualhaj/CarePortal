@@ -99,7 +99,7 @@ function page() {
         </div>
       </div>
 
-      <div className="py-[30] bg-blue-500">
+      <div className="py-[30px] bg-blue-500">
         <Footer />
       </div>
     </>
