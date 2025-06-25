@@ -12,7 +12,7 @@ body {
 
 input,
 textarea {
-  @apply border border-gray-300 focus:outline-0 p-2 rounded-md placeholder:text-[15px] w-full;
+  @apply border border-gray-300 focus:outline-0 focus:border-blue-400  p-2 rounded-md placeholder:text-[15px] w-full;
 }
 
 select {
