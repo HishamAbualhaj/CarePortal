@@ -1,11 +1,15 @@
 "use client";
 import Button from "@/components/ui/Button";
-import useFetch from "@/hooks/useFetch";
+import Modal from "@/components/ui/Modal";
+import { auth, db } from "@/firebase/config";
 import { useMutation } from "@tanstack/react-query";
+import { FirebaseError } from "firebase/app";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-
+import { useRouter } from "next/navigation";
 function page() {
+  const router = useRouter();
   const inputs = [
     { id: "email", text: "Email", type: "text", warning: null },
     { id: "password", text: "Password", type: "password", warning: null },
@@ -14,11 +18,23 @@ function page() {
     email: "",
     password: null,
   });
+
+  const login = async () => {
+    try {
+      await signInWithEmailAndPassword(auth, userData.email, userData.password);
+      return { message: "Login successfully", status: true };
+    } catch (error) {
+      if (error instanceof FirebaseError) {
+        if (error.code === "auth/invalid-credential") {
+          return { message: "Email or password is incorrect", status: false };
+        }
+        return { message: "Faild to login in", status: false };
+      }
+    }
+  };
   const { mutate, data, isPending } = useMutation({
     mutationKey: ["authUser"],
-    mutationFn: async () => {
-      return await useFetch("/api/authUser", "POST", userData);
-    },
+    mutationFn: login,
   });
 
   const hanldeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,7 +42,16 @@ function page() {
 
     setUserData((prev) => ({ ...prev, [id]: value }));
   };
+  const [modal, setModal] = useState<boolean>(false);
 
+  useEffect(() => {
+    if (data) {
+      setModal(true);
+      {
+        data.status && router.push("/");
+      }
+    }
+  }, [data]);
   return (
     <>
       <div className="flex h-screen ems-center">
@@ -88,6 +113,9 @@ function page() {
           </div>
         </div>
       </div>
+      {modal && (
+        <Modal text={data?.message} status={data?.status} setModel={setModal} />
+      )}
     </>
   );
 }

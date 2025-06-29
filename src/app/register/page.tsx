@@ -4,12 +4,20 @@ import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import useFetch from "@/hooks/useFetch";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/firebase/config";
+import { createDataDoc } from "@/firebase/db";
+import { FirebaseError } from "firebase/app";
+import Modal from "@/components/ui/Modal";
+import { useRouter } from "next/navigation";
 function page() {
+  const router = useRouter();
   const [inputs, setInputs] = useState<Record<string, any>[]>([
     { id: "name", text: "Full Name", type: "text", warning: null },
     { id: "email", text: "Email", type: "text", warning: null },
     { id: "mobile", text: "Phone number", type: "text", warning: null },
     { id: "date", text: "Date of birth", type: "date", warning: null },
+    { id: "gender", text: "Gender", type: "select", warning: null },
     {
       id: "password",
       text: "Password",
@@ -30,21 +38,49 @@ function page() {
     mobile: "",
     date: "",
     image_url: "",
+    gender: "",
     password: null,
     confirmpass: null,
     address: "",
-    status: false,
+    status: true,
     isVerified: false,
   });
+
+  const signup = async () => {
+    try {
+      const { password, confirmpass, ...cleanedUserData } = userData;
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        userData.email,
+        userData.password
+      );
+      const id = await createDataDoc({
+        data: cleanedUserData,
+        docName: "users",
+        id: userCredential.user.uid,
+      });
+
+      return { message: "Signup successfully", status: true };
+    } catch (error) {
+      if (error instanceof FirebaseError) {
+        console.error(error);
+        if (error.code === "auth/email-already-in-use") {
+          return { message: "Email is already in use", status: false };
+        } else if (error.code === "auth/weak-password") {
+          return {
+            message: "Password must be at least 6 character ",
+            status: false,
+          };
+        }
+        return { message: "Faild to sign up", status: false };
+      }
+    }
+  };
   const { mutate, data, isPending } = useMutation({
     mutationKey: ["addUser"],
-    mutationFn: async () => {
-      const { confirmpass, ...cleanedUserData } = userData;
-
-      return await useFetch("/api/addUser", "POST", cleanedUserData);
-    },
+    mutationFn: signup,
   });
-  const hanldeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value, tabIndex } = e.target;
 
     const currentInput = inputs[tabIndex];
@@ -89,6 +125,17 @@ function page() {
 
     setInputs(newInputs);
   }, [userData.password, userData.confirmpass]);
+
+  const [modal, setModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (data) {
+      setModal(true);
+      {
+        data.status && router.push("/");
+      }
+    }
+  }, [data]);
   return (
     <>
       <div className="flex h-screen ems-center">
@@ -113,15 +160,23 @@ function page() {
                     <div className="text-black/80 text-[16px]">
                       {input.text}
                     </div>
-                    <input
-                      style={{
-                        border: `${input.warning ? "1px solid red" : ""} `,
-                      }}
-                      tabIndex={i}
-                      id={input.id}
-                      onChange={hanldeChange}
-                      type={input.type}
-                    />
+                    {input.type === "select" ? (
+                      <select name="" id="">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                      </select>
+                    ) : (
+                      <input
+                        style={{
+                          border: `${input.warning ? "1px solid red" : ""} `,
+                        }}
+                        tabIndex={i}
+                        id={input.id}
+                        onChange={handleChange}
+                        type={input.type}
+                      />
+                    )}
+
                     {input.warning && (
                       <div className="text-red-500 text-sm absolute -bottom-5 left-0">
                         {input.warning}
@@ -148,6 +203,9 @@ function page() {
           </div>
         </div>
       </div>
+      {modal && (
+        <Modal text={data?.message} status={data?.status} setModel={setModal} />
+      )}
     </>
   );
 }
