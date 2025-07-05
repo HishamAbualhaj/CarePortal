@@ -5,10 +5,8 @@ import { tableProps, colType } from "@/types/TableTypes";
 import Popup from "./Popup";
 import { PopupProps } from "@/types/AdminPanelProps";
 
-interface ComponentProps extends tableProps {
-  tablePopup?: PopupProps[];
-}
-function Table({ columns, customAction, data, tablePopup }: ComponentProps) {
+interface ComponentProps extends tableProps {}
+function Table({ columns, customAction, data, tablePopup }: tableProps) {
   const [isPop, setPopUp] = useState<PopupProps | null>(null);
 
   return (
@@ -37,25 +35,28 @@ function Table({ columns, customAction, data, tablePopup }: ComponentProps) {
         </thead>
         <tbody>
           {Boolean(data.length) &&
-            data?.map((item: Record<string, any>, i: number) => (
-              <tr key={i}>
-                {columns.map((col, i) =>
-                  col.key === "action" ? null : (
-                    <td
-                      key={i}
-                      className="text-nowrap border border-gray-300 p-5"
-                    >
-                      {item[col.key]}
+            data?.map((item: Record<string, any>, i: number) => {
+              const popup = tablePopup?.(item);
+              return (
+                <tr key={i}>
+                  {columns.map((col, i) =>
+                    col.key === "action" ? null : (
+                      <td
+                        key={i}
+                        className="text-nowrap border border-gray-300 p-5"
+                      >
+                        {item[col.key]}
+                      </td>
+                    )
+                  )}
+                  {customAction && (
+                    <td className="border border-gray-300 p-5">
+                      {customAction(item, setPopUp, popup)}
                     </td>
-                  )
-                )}
-                {customAction && (
-                  <td className="border border-gray-300 p-5">
-                    {customAction(item, setPopUp, tablePopup)}
-                  </td>
-                )}
-              </tr>
-            ))}
+                  )}
+                </tr>
+              );
+            })}
         </tbody>
       </table>
       {!Boolean(data.length) && (

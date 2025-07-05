@@ -33,7 +33,7 @@ function ClientMessages({ data }: { data: any[] }) {
                 btns={["edit", "delete"]}
               />
             )}
-            tablePopup={[
+            tablePopup={() => [
               {
                 popupTitle: "Delete Message",
                 popupContent: "Are you sure you want to delete this message?",

@@ -12,7 +12,6 @@ export interface adminPanelProps extends tableProps {
   ) => ReactNode;
   filterAction?: () => void;
   mainPopup?: PopupProps;
-  tablePopup?: PopupProps[];
 }
 
 export interface PopupProps {

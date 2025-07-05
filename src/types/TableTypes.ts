@@ -7,11 +7,10 @@ export interface tableProps {
   customAction?:
     | null
     | ((
-        item: Object,
-        actionFn:
-          | (() => void)
-          | Dispatch<SetStateAction<PopupProps | null>>,
+        item: Record<string, any>,
+        actionFn: (() => void) | Dispatch<SetStateAction<PopupProps | null>>,
         tablePopup?: PopupProps[]
       ) => ReactNode);
   data: any[];
+  tablePopup?: (id?: Record<string, any>) => PopupProps[];
 }

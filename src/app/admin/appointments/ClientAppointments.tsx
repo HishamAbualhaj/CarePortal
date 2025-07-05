@@ -72,7 +72,7 @@ function ClientAppointments({ data }: { data: any[] }) {
                 btns={["edit", "delete"]}
               />
             )}
-            tablePopup={[
+            tablePopup={() => [
               {
                 popupTitle: "Delete Appointment",
                 popupContent:

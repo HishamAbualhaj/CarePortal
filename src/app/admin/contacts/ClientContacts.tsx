@@ -32,7 +32,7 @@ function ClientContacts({ data }: { data: any[] }) {
                 btns={["delete"]}
               />
             )}
-            tablePopup={[
+            tablePopup={() => [
               {
                 popupTitle: "Delete Contact",
                 popupContent: "Are you sure you want to delete this contact?",

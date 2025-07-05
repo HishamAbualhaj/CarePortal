@@ -131,7 +131,7 @@ function ClientUsers({ data }: { data: any[] }) {
                 btns={["edit", "delete"]}
               />
             )}
-            tablePopup={[
+            tablePopup={() => [
               {
                 popupTitle: "Delete User",
                 popupContent: "Are you sure you want to delete this user?",

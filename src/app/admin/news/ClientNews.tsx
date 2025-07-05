@@ -77,7 +77,7 @@ function ClientNews({ data }: { data: any[] }) {
                 btns={["edit", "delete"]}
               />
             )}
-            tablePopup={[
+            tablePopup={() => [
               {
                 popupTitle: "Delete News",
                 popupContent: "Are you sure you want to delete this news?",
