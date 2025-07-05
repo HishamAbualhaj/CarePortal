@@ -15,8 +15,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import React, { ReactNode, useState } from "react";
-
+import React, { ReactNode, useContext, useEffect, useState } from "react";
+import { AuthContext } from "@/context/AuthContextUser";
+import { AuthContextType } from "@/context/AuthContextUser";
 type navsType = navType[];
 type navType = {
   text: string | ReactNode;
@@ -26,6 +27,7 @@ type navType = {
 interface navsProps {
   navs: navsType;
   withClick?: boolean;
+  data?: AuthContextType | null;
 }
 
 function Header() {
@@ -56,7 +58,10 @@ function Header() {
       popup: UserPopup(),
     },
   ];
-
+  const data = useContext(AuthContext);
+  useEffect(() => {
+    console.log("data", data?.user);
+  }, [data]);
   const [navs, setNavs] = useState<navsType>(arr);
 
   const [activeNav, setActiveNav] = useState<boolean>(false);
@@ -71,8 +76,8 @@ function Header() {
           </div>
         </Link>
 
-        <div className="flex max-md:hidden">
-          <RenderNav navs={navs} withClick={false} />
+        <div className="flex items-center max-md:hidden">
+          <RenderNav data={data} navs={navs} withClick={false} />
         </div>
 
         <div
@@ -86,7 +91,7 @@ function Header() {
 
         {activeNav && (
           <div className="flex flex-col absolute top-full left-0 bg-gray-50 shadow-main text-black w-full md:hidden z-10">
-            <RenderNav navs={navs} withClick={true} />
+            <RenderNav data={data} navs={navs} withClick={true} />
           </div>
         )}
       </div>
@@ -94,7 +99,7 @@ function Header() {
   );
 }
 
-function RenderNav({ navs, withClick = false }: navsProps) {
+function RenderNav({ navs, withClick = false, data }: navsProps) {
   const [hovered, setHovered] = useState<number | null>(null);
 
   const clickNav = (i: number) => {
@@ -128,17 +133,55 @@ function RenderNav({ navs, withClick = false }: navsProps) {
           }
           key={i}
         >
-          <Link
-            className={`block relative  ${
-              hovered === i
-                ? "after:absolute after:h-[2px] after:w-full after:bottom-0 after:left-0 after:bg-cyan-400"
-                : ""
-            }  cursor-pointer py-6 px-5`}
-            href={nav.link}
-          >
-            {nav.text}
-          </Link>
-          {nav.popup && hovered === i && nav?.popup}
+          {i === 4 ? (
+            data?.user ? (
+              <>
+                <Link
+                  className={`block relative  ${
+                    hovered === i
+                      ? "after:absolute after:h-[2px] after:w-full after:bottom-0 after:left-0 after:bg-cyan-400"
+                      : ""
+                  }  cursor-pointer py-6 px-5`}
+                  href={nav.link}
+                >
+                  <div className="flex items-center gap-2">
+                    {nav.text}
+                    {data.user.name}
+                  </div>
+                </Link>
+                {nav.popup && hovered === i && nav?.popup}
+              </>
+            ) : (
+              <div className="flex items-center gap-2 md:p-0 px-5 pb-5">
+                <Link
+                  className="px-4 py-2 text-white bg-blue-400 rounded-sm"
+                  href="/login"
+                >
+                  Login
+                </Link>
+                <Link
+                  className="px-4 py-2 text-white bg-blue-400 rounded-sm"
+                  href="/register"
+                >
+                  Signup
+                </Link>
+              </div>
+            )
+          ) : (
+            <>
+              <Link
+                className={`block relative ${
+                  hovered === i
+                    ? "after:absolute after:h-[2px] after:w-full after:bottom-0 after:left-0 after:bg-cyan-400"
+                    : ""
+                } cursor-pointer py-6 px-5`}
+                href={nav.link}
+              >
+                {nav.text}
+              </Link>
+              {nav.popup && hovered === i && nav?.popup}
+            </>
+          )}
         </div>
       ))}
     </>
