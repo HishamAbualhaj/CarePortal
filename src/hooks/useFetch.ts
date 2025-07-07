@@ -1,12 +1,12 @@
-type response = {
-  message: string;
-  data: any;
-};
+interface Response {
+  status: boolean;
+  msg: string;
+}
 async function useFetch(
   apiUrl: string,
   method: string,
   data?: Record<string, any>
-) {
+): Promise<Response> {
   const res = await fetch(apiUrl, {
     method: method,
     headers: {
@@ -17,11 +17,11 @@ async function useFetch(
       : undefined,
   });
 
-  const result = (await res.json()) as response;
+  const result = await res.json();
   if (!res.ok) {
     return {
-      message: result.message || "Faild to connect to server",
-      data: null,
+      msg: result.message || "Faild to connect to server",
+      status: false,
     };
   }
   return result;
