@@ -8,7 +8,7 @@ const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"], // Choose what you need
   variable: "--font-poppins", // Optional if using Tailwind or CSS var
 });
-
+import "react-toastify/dist/ReactToastify.css";
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -16,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={poppins.className}>
-      <body  className={`antialiased`}>
+      <body className={`antialiased`}>
         <AuthContextUser>
           <ReactQueryProvider children={children} />
         </AuthContextUser>
