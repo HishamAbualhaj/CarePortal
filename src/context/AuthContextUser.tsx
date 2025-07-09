@@ -17,6 +17,8 @@ export type UserProfile = {
   isVerified: boolean;
   mobile: string;
   name: string;
+  role: string;
+  token: string;
 };
 export type AuthContextType = {
   user: UserProfile | null;
@@ -30,10 +32,11 @@ function AuthContextUser({ children }: Props) {
   useEffect(() => {
     const authChange = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        const token = await auth.currentUser?.getIdToken();
         const userRef = doc(db, "users", user?.uid);
         const snap = await getDoc(userRef);
         if (snap.exists()) {
-          const newUser = { uid: user?.uid, ...snap.data() };
+          const newUser = { uid: user?.uid, ...snap.data(), token };
           setUser(newUser as UserProfile);
           setLoading(false);
           return;
