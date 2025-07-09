@@ -2,7 +2,7 @@ import React from "react";
 import ClientDoctors from "./ClientDoctors";
 
 function page() {
-  return <ClientDoctors data={[]} />;
+  return <ClientDoctors />;
 }
 
 export default page;
