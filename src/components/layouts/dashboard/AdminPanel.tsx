@@ -16,8 +16,8 @@ function AdminPanel({
   customAction,
   panelTitle,
   btnText,
-  mainPopup,
   tablePopup,
+  mainPopup,
   data,
   filterContent,
   filterAction,
@@ -44,7 +44,7 @@ function AdminPanel({
         {isPop && (
           <Popup
             popupTitle={mainPopup?.popupTitle}
-            popupContent={mainPopup?.popupContent}
+            PopupContent={mainPopup?.PopupContent}
             popupActionText={mainPopup?.popupActionText}
             popupAction={mainPopup?.popupAction}
             setPopup={setPopUp}
@@ -59,7 +59,7 @@ function AdminPanel({
                 <Button
                   icon={<FontAwesomeIcon icon={faPlus} />}
                   onClick={() => {
-                    setPopUp({});
+                    setPopUp({} as PopupProps);
                   }}
                   text={btnText}
                 />
