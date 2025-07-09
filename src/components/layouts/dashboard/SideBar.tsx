@@ -12,26 +12,35 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import React, { useState } from "react";
-
-function SideBar({ isAdmin = false }) {
+import React, { useContext, useEffect, useState } from "react";
+import { AuthContext } from "@/context/AuthContextUser";
+function SideBar() {
   const adminRoute = "/admin";
 
   const [isTranslate, setIsTranslate] = useState<boolean>(false);
 
   const [minimize, setMinimize] = useState<boolean>(false);
-  const sideBarItems = [
+
+  const dataContext = useContext(AuthContext);
+
+  const [role, setRole] = useState<string | null>("");
+  useEffect(() => {
+    const data = dataContext;
+    const user = data?.user;
+
+    setRole(user?.role ?? "");
+  }, [dataContext]);
+
+  const adminItems = [
     {
       text: "Users",
       icon: <FontAwesomeIcon icon={faUsers} />,
       link: `${adminRoute}/users`,
-      adminRoute: true,
     },
     {
       text: "Doctors",
       icon: <FontAwesomeIcon icon={faUserDoctor} />,
       link: `${adminRoute}/doctors`,
-      adminRoute: true,
     },
     {
       text: "Appointments",
@@ -52,9 +61,25 @@ function SideBar({ isAdmin = false }) {
       text: `Contacts`,
       icon: <FontAwesomeIcon icon={faAddressBook} />,
       link: `${adminRoute}/contacts`,
-      adminRoute: true,
     },
     { text: "Roles List", icon: null, link: "", adminRoute: true },
+  ];
+  const doctorItems = [
+    {
+      text: "Appointments",
+      icon: <FontAwesomeIcon icon={faCalendarCheck} />,
+      link: `${adminRoute}/appointments`,
+    },
+    {
+      text: "Messages",
+      icon: <FontAwesomeIcon icon={faMessage} />,
+      link: `${adminRoute}/messages`,
+    },
+    {
+      text: `News`,
+      icon: <FontAwesomeIcon icon={faNewspaper} />,
+      link: `${adminRoute}/news`,
+    },
   ];
   return (
     <>
@@ -106,33 +131,35 @@ function SideBar({ isAdmin = false }) {
 
             <div className="mt-2">
               <div className="flex flex-col gap-2">
-                {sideBarItems.map((item, i) =>
-                  isAdmin ? (
-                    <Link
-                      href={item.link}
-                      key={i}
-                      className={`flex ${
-                        !minimize ? "px-5 py-3 text-[15px]" : "justify-center px-3 py-3 text-xl"
-                      } items-center gap-2 hover:bg-[#191b28] hover:text-white cursor-pointer `}
-                    >
-                      {item.icon}
-                      {!minimize && item.text}
-                    </Link>
-                  ) : (
-                    !item?.adminRoute && (
+                {role === "admin"
+                  ? adminItems.map((item, i) => (
                       <Link
                         href={item.link}
                         key={i}
                         className={`flex ${
-                          !minimize ? "px-5 py-3 text-[15px]" : "justify-center px-3 py-3 text-xl"
-                        } items-center gap-2 hover:bg-[#191b28] hover:text-white cursor-pointer`}
+                          !minimize
+                            ? "px-5 py-3 text-[15px]"
+                            : "justify-center px-3 py-3 text-xl"
+                        } items-center gap-2 hover:bg-[#191b28] hover:text-white cursor-pointer `}
                       >
                         {item.icon}
                         {!minimize && item.text}
                       </Link>
-                    )
-                  )
-                )}
+                    ))
+                  : doctorItems.map((item, i) => (
+                      <Link
+                        href={item.link}
+                        key={i}
+                        className={`flex ${
+                          !minimize
+                            ? "px-5 py-3 text-[15px]"
+                            : "justify-center px-3 py-3 text-xl"
+                        } items-center gap-2 hover:bg-[#191b28] hover:text-white cursor-pointer `}
+                      >
+                        {item.icon}
+                        {!minimize && item.text}
+                      </Link>
+                    ))}
               </div>
             </div>
           </div>
