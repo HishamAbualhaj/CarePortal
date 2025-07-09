@@ -22,7 +22,7 @@ async function useFetch(
   const result = await res.json();
   if (!res.ok) {
     return {
-      msg: result.message || "Faild to connect to server",
+      msg: result.msg || "Faild to connect to server",
       status: false,
     };
   }
