@@ -7,7 +7,7 @@ interface ComponentProps extends PopupProps {
 }
 function Popup({
   popupTitle,
-  popupContent,
+  PopupContent,
   popupAction,
   popupActionText,
   setPopup,
@@ -29,21 +29,7 @@ function Popup({
           {popupTitle}
         </div>
         <div className="px-5">
-          {typeof popupContent === "string" ? (
-            <div className="text-xl py-5">{popupContent}</div>
-          ) : (
-            popupContent?.map((item, i) => (
-              <div
-                key={i}
-                className="flex items-center py-4 gap-4 justify-between"
-              >
-                <div className="text-gray-700">{item.text}</div>
-                <div className="flex-1 md:min-w-[400px] max-w-[400px]">
-                  {item.item}
-                </div>
-              </div>
-            ))
-          )}
+          {typeof PopupContent === "function" ? <PopupContent /> : PopupContent}
         </div>
 
         <div className="px-5 border-t p-5 border-gray-300">
