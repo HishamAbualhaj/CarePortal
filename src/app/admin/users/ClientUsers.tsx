@@ -18,35 +18,9 @@ import useFetch from "@/hooks/useFetch";
 import useUpload from "@/hooks/useUpload";
 import Image from "next/image";
 import { AuthContext } from "@/context/AuthContextUser";
-interface Response {
-  status: boolean;
-  msg: string | Record<string, any>;
-}
-
-export type formData = {
-  image_url: string | null;
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  mobile: string;
-  gender: string;
-  status: string;
-  date: string;
-  diseases: string;
-  fileName: string | null;
-};
-
-type FormItem<K extends keyof formData> = {
-  key: K;
-  text: string;
-  item: (
-    itemValue: string,
-    handleItemChange: (
-      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-    ) => void
-  ) => ReactNode;
-};
+import { formUser as formData, FormItem } from "@/types/adminTypes";
+import { handleChange } from "@/app/helpers/handleInputChange";
+import { Response } from "@/types/adminTypes";
 
 function ClientUsers() {
   const user = useContext(AuthContext);
@@ -207,6 +181,7 @@ function ClientUsers() {
     queryFn: async () => {
       return await useFetch("/api/getUsers", "GET", {}, userToken);
     },
+    enabled: !!userToken,
   });
   return (
     <div className="flex h-screen">
@@ -281,7 +256,7 @@ function ClientUsers() {
                 await add.mutateAsync();
               },
             }}
-            data={data ?? [{}]}
+            data={typeof data?.msg === "string" ? [] : data?.msg ?? []}
             panelTitle="Users"
             filterContent={(handleChange, idChange) => (
               <>
@@ -340,31 +315,7 @@ const AddItems = ({
     setAddFile(file);
   }, [file]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { id, value, type } = e.target;
-    if (type === "file") {
-      const currentFile = e.target.files?.[0] ?? null;
-      setFile(currentFile);
-      if (currentFile) {
-        const tempUrl = URL.createObjectURL(currentFile);
-        setTempImageUrl(tempUrl);
-
-        setFormData((prev) => ({
-          ...prev,
-          fileName: currentFile.name,
-        }));
-      }
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [id]: value,
-      }));
-    }
-  };
-
-  const itemsArr: FormItem<keyof formData>[] = [
+  const itemsArr: FormItem<formData, keyof formData>[] = [
     {
       key: "image_url",
       text: "Image",
@@ -423,7 +374,7 @@ const AddItems = ({
     {
       key: "password",
       text: "Password",
-      item: (inputData: string) => (
+      item: (inputData: string, handleChange) => (
         <input
           id="password"
           className="bg-gray-100 border-none"
@@ -437,7 +388,7 @@ const AddItems = ({
     {
       key: "confirmPassword",
       text: "Confirm Password",
-      item: (inputData: string) => (
+      item: (inputData: string, handleChange) => (
         <input
           id="confirmPassword"
           className="bg-gray-100 border-none"
@@ -451,7 +402,7 @@ const AddItems = ({
     {
       key: "mobile",
       text: "Mobile",
-      item: (inputData: string) => (
+      item: (inputData: string, handleChange) => (
         <input
           id="mobile"
           className="bg-gray-100 border-none"
@@ -465,7 +416,7 @@ const AddItems = ({
     {
       key: "gender",
       text: "Gender",
-      item: (inputData: string) => (
+      item: (inputData: string, handleChange) => (
         <select
           id="gender"
           className="bg-gray-100 border-none"
@@ -480,7 +431,7 @@ const AddItems = ({
     {
       key: "status",
       text: "Status",
-      item: (inputData: string) => (
+      item: (inputData: string, handleChange) => (
         <select
           id="status"
           className="bg-gray-100 border-none"
@@ -495,7 +446,7 @@ const AddItems = ({
     {
       key: "date",
       text: "Birthday",
-      item: (inputData: string) => (
+      item: (inputData: string, handleChange) => (
         <input
           id="date"
           className="bg-gray-100 border-none"
@@ -508,7 +459,7 @@ const AddItems = ({
     {
       key: "diseases",
       text: "Diseases",
-      item: (inputData: string) => (
+      item: (inputData: string, handleChange) => (
         <select
           id="diseases"
           className="bg-gray-100 border-none"
@@ -528,7 +479,9 @@ const AddItems = ({
         <div key={i} className="flex items-center py-4 gap-4 justify-between">
           <div className="text-gray-700">{item.text}</div>
           <div className="flex-1 md:min-w-[400px] max-w-[400px]">
-            {item.item(formData[item.key] || "", handleChange)}
+            {item.item(formData[item.key] || "", (e) => {
+              handleChange(e, setFormData, setFile, setTempImageUrl);
+            })}
           </div>
         </div>
       ))}
@@ -559,32 +512,8 @@ const EditItems = ({
   useEffect(() => {
     setEditFile(file);
   }, [file]);
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-    item?: Record<string, any>
-  ) => {
-    const { id, value, type } = e.target;
-    if (type === "file") {
-      const currentFile = e.target.files?.[0] ?? null;
-      setFile(currentFile);
-      if (currentFile) {
-        const tempUrl = URL.createObjectURL(currentFile);
-        setTempImageUrl(tempUrl);
 
-        setFormData((prev) => ({
-          ...prev,
-          fileName: currentFile.name,
-        }));
-      }
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [id]: value,
-      }));
-    }
-  };
-
-  const itemsArr: FormItem<keyof formData>[] = [
+  const itemsArr: FormItem<formData, keyof formData>[] = [
     {
       key: "image_url",
       text: "Image",
@@ -643,7 +572,7 @@ const EditItems = ({
     {
       key: "mobile",
       text: "Mobile",
-      item: (inputData: string) => (
+      item: (inputData: string, handleChange) => (
         <input
           id="mobile"
           className="bg-gray-100 border-none"
@@ -657,7 +586,7 @@ const EditItems = ({
     {
       key: "gender",
       text: "Gender",
-      item: (inputData: string) => (
+      item: (inputData: string, handleChange) => (
         <select
           id="gender"
           className="bg-gray-100 border-none"
@@ -672,7 +601,7 @@ const EditItems = ({
     {
       key: "status",
       text: "Status",
-      item: (inputData: string) => (
+      item: (inputData: string, handleChange) => (
         <select
           id="status"
           className="bg-gray-100 border-none"
@@ -687,7 +616,7 @@ const EditItems = ({
     {
       key: "date",
       text: "Birthday",
-      item: (inputData: string) => (
+      item: (inputData: string, handleChange) => (
         <input
           id="date"
           className="bg-gray-100 border-none"
@@ -700,7 +629,7 @@ const EditItems = ({
     {
       key: "diseases",
       text: "Diseases",
-      item: (inputData: string) => (
+      item: (inputData: string, handleChange) => (
         <select
           id="diseases"
           className="bg-gray-100 border-none"
@@ -720,7 +649,9 @@ const EditItems = ({
         <div key={i} className="flex items-center py-4 gap-4 justify-between">
           <div className="text-gray-700">{item.text}</div>
           <div className="flex-1 md:min-w-[400px] max-w-[400px]">
-            {item.item(formData[item.key] || "", handleChange)}
+            {item.item(formData[item.key] || "", (e) => {
+              handleChange(e, setFormData, setFile, setTempImageUrl);
+            })}
           </div>
         </div>
       ))}
