@@ -1,22 +1,29 @@
 "use client";
-import React, { useState } from "react";
+import React, {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import AdminPanel from "@/components/layouts/dashboard/AdminPanel";
 import SideBar from "@/components/layouts/dashboard/SideBar";
-import { faPen, faTrash, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ActionButtons from "@/components/layouts/dashboard/ActionButtons";
 import { ToastContainer, toast } from "react-toastify";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import useFetch from "@/hooks/useFetch";
 import useUpload from "@/hooks/useUpload";
 import Image from "next/image";
-
+import { AuthContext } from "@/context/AuthContextUser";
 interface Response {
   status: boolean;
-  msg: string;
+  msg: string | Record<string, any>;
 }
 
-type formData = {
+export type formData = {
   image_url: string | null;
   name: string;
   email: string;
@@ -29,11 +36,27 @@ type formData = {
   diseases: string;
   fileName: string | null;
 };
-function ClientUsers({ data }: { data: any[] }) {
-  const [file, setFile] = useState<File | null>(null);
-  const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState<formData>({
+type FormItem<K extends keyof formData> = {
+  key: K;
+  text: string;
+  item: (
+    itemValue: string,
+    handleItemChange: (
+      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => void
+  ) => ReactNode;
+};
+
+function ClientUsers() {
+  const user = useContext(AuthContext);
+  const [userToken, setUserToken] = useState<string>("");
+  useEffect(() => {
+    setUserToken(user?.user?.token ?? "");
+  }, [user]);
+  const [file, setFile] = useState<File | null>(null);
+
+  const [addData, setAddData] = useState<formData | Record<string, any>>({
     image_url: "",
     name: "",
     email: "",
@@ -46,218 +69,145 @@ function ClientUsers({ data }: { data: any[] }) {
     diseases: "d1",
     fileName: "",
   });
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+
+  const [editData, setEditData] = useState<formData | Record<string, any>>({
+    name: "",
+    email: "",
+    mobile: "+",
+    gender: "Male",
+    status: "Sick",
+    date: "",
+    diseases: "d1",
+    fileName: "",
+  });
+
+  const useUserMutation = (
+    apiFn: (url: string | null, token: string) => Promise<Response>,
+    stateData: formData | Record<string, any>,
+    text: string,
+    token: string
   ) => {
-    const { id, value, type } = e.target;
-    if (type === "file") {
-      const currentFile = e.target.files?.[0] ?? null;
-      setFile(currentFile);
-      if (currentFile) {
-        const tempUrl = URL.createObjectURL(currentFile);
-        setTempImageUrl(tempUrl);
+    const userMutation = useMutation<Response>({
+      mutationFn: async (): Promise<Response> => {
+        if (!stateData.mobile.startsWith("+")) {
+          toast.error("Mobile number wrong formate");
+          return {} as Response;
+        }
+        if (
+          !stateData.name ||
+          !stateData.email ||
+          !stateData.mobile ||
+          !stateData.date
+        ) {
+          toast.error("Fields are required");
+          return {} as Response;
+        }
 
-        setFormData((prev) => ({
-          ...prev,
-          fileName: currentFile.name,
-        }));
-      }
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [id]: value,
-      }));
+        if (stateData.password !== stateData.confirmPassword) {
+          toast.error("Passwords do not match");
+          return {} as Response;
+        }
+        let url = "";
+        if (file) {
+          url = (await useUpload(file)) || "";
+        }
+
+        return await apiFn(url, token);
+      },
+      onSuccess: (data) => {
+        if (!data || Object.keys(data).length === 0) return;
+        if (data.status) {
+          toast.success(text);
+          return;
+        }
+        if (typeof data?.msg === "string") toast.error(data?.msg || text);
+      },
+      onError: () => {
+        toast.error("Something went wrong!");
+      },
+    });
+
+    return userMutation;
+  };
+  const createUser = async (
+    url: string | null,
+    token: string
+  ): Promise<Response> => {
+    const { confirmPassword, ...data } = addData;
+    return await useFetch(
+      "/api/addUser",
+      "POST",
+      {
+        ...data,
+        image_url: url,
+      },
+      token
+    );
+  };
+
+  const updateUser = async (
+    url: string | null,
+    token: string
+  ): Promise<Response> => {
+    let updatedData = { ...editData };
+    if (url) {
+      updatedData = { ...editData, image_url: url };
     }
-  };
-  const createUser = async (url: string | null): Promise<Response> => {
-    const { confirmPassword, ...data } = formData;
-    return await useFetch("/api/addUser", "POST", { ...data, image_url: url });
+    return await useFetch("/api/editUser", "PUT", updatedData, token);
   };
 
-  const addUserMutation = useMutation<Response>({
-    mutationFn: async (): Promise<Response> => {
-      if (!formData.mobile.startsWith("+")) {
-        toast.error("Mobile number wrong formate");
-        return {} as Response;
-      }
-      if (
-        !formData.name ||
-        !formData.email ||
-        !formData.mobile ||
-        !formData.date
-      ) {
-        toast.error("Fields are required");
-        return {} as Response;
-      }
+  const deleteUser = async (
+    dataForDelete: formData,
+    token: string
+  ): Promise<Response> => {
+    await useUpload(dataForDelete.fileName, "delete");
+    return await useFetch(
+      "/api/deleteUser",
+      "DELETE",
+      {
+        ...dataForDelete,
+      },
+      token
+    );
+  };
 
-      if (formData.password !== formData.confirmPassword) {
-        toast.error("Passwords do not match");
-        return {} as Response;
-      }
-      const url = await useUpload(file);
-      return await createUser(url);
+  const deleteMutation = useMutation({
+    mutationFn: async (data: formData) => {
+      return await deleteUser(data, userToken);
     },
     onSuccess: (data) => {
       if (!data || Object.keys(data).length === 0) return;
       if (data.status) {
-        toast.success(data?.msg || "User added successfully!");
+        toast.success("User deleted successfully!");
         return;
       }
-
-      toast.error(data?.msg || "User added successfully!");
+      if (typeof data?.msg === "string") toast.error(data?.msg || "");
     },
     onError: () => {
       toast.error("Something went wrong!");
     },
   });
 
-  const items = [
-    {
-      text: "Image",
-      item: (
-        <div className="relative">
-          <input
-            id="image_url"
-            className="absolute left-0 h-full w-full opacity-0"
-            type="file"
-            onChange={handleChange}
-          />
-          {tempImageUrl ? (
-            <Image
-              alt="user profile"
-              width={200}
-              height={200}
-              src={tempImageUrl}
-            />
-          ) : (
-            <FontAwesomeIcon
-              className="text-8xl bg-gray-300 text-gray-400 p-4"
-              icon={faUser}
-            />
-          )}
-        </div>
-      ),
+  const add = useUserMutation(
+    createUser,
+    addData,
+    "User added successfully!",
+    userToken
+  );
+
+  const edit = useUserMutation(
+    updateUser,
+    editData,
+    "User updated successfully!",
+    userToken
+  );
+
+  const { data } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      return await useFetch("/api/getUsers", "GET", {}, userToken);
     },
-    {
-      text: "Name",
-      item: (
-        <input
-          id="name"
-          className="bg-gray-100 border-none"
-          type="text"
-          placeholder="Name"
-          value={formData.name}
-          onChange={handleChange}
-        />
-      ),
-    },
-    {
-      text: "Email",
-      item: (
-        <input
-          id="email"
-          className="bg-gray-100 border-none"
-          type="text"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-      ),
-    },
-    {
-      text: "Password",
-      item: (
-        <input
-          id="password"
-          className="bg-gray-100 border-none"
-          type="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-        />
-      ),
-    },
-    {
-      text: "Confirm Password",
-      item: (
-        <input
-          id="confirmPassword"
-          className="bg-gray-100 border-none"
-          type="password"
-          placeholder="Confirm password"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-        />
-      ),
-    },
-    {
-      text: "Mobile",
-      item: (
-        <input
-          id="mobile"
-          className="bg-gray-100 border-none"
-          type="text"
-          placeholder="Mobile"
-          value={formData.mobile}
-          onChange={handleChange}
-        />
-      ),
-    },
-    {
-      text: "Gender",
-      item: (
-        <select
-          id="gender"
-          className="bg-gray-100 border-none"
-          value={formData.gender}
-          onChange={handleChange}
-        >
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-        </select>
-      ),
-    },
-    {
-      text: "Status",
-      item: (
-        <select
-          id="status"
-          className="bg-gray-100 border-none"
-          value={formData.status}
-          onChange={handleChange}
-        >
-          <option value="Sick">Sick</option>
-          <option value="Good">Good</option>
-        </select>
-      ),
-    },
-    {
-      text: "Birthday",
-      item: (
-        <input
-          id="date"
-          className="bg-gray-100 border-none"
-          type="date"
-          value={formData.date}
-          onChange={handleChange}
-        />
-      ),
-    },
-    {
-      text: "Diseases",
-      item: (
-        <select
-          id="diseases"
-          className="bg-gray-100 border-none"
-          value={formData.diseases}
-          onChange={handleChange}
-        >
-          <option value="d1">Disease 1</option>
-          <option value="d2">Disease 2</option>
-        </select>
-      ),
-    },
-  ];
+  });
   return (
     <div className="flex h-screen">
       <ToastContainer position="top-right" autoClose={3000} />
@@ -274,7 +224,7 @@ function ClientUsers({ data }: { data: any[] }) {
               { key: "mobile", label: "Mobile" },
               { key: "gender", label: "Gender" },
               { key: "status", label: "Status" },
-              { key: "birthday", label: "Birthday" },
+              { key: "date", label: "Birthday" },
               { key: "diseases", label: "Diseases" },
               { key: "action", label: "Actions" },
             ]}
@@ -286,32 +236,52 @@ function ClientUsers({ data }: { data: any[] }) {
                 btns={["edit", "delete"]}
               />
             )}
-            tablePopup={() => [
+            tablePopup={(item) => [
               {
                 popupTitle: "Delete User",
-                popupContent: "Are you sure you want to delete this user?",
+                PopupContent: (
+                  <div className="text-xl py-5">
+                    Are you sure you want to delete this user ?
+                  </div>
+                ),
                 popupActionText: "Delete",
-                popupAction: () => {},
+                popupAction: async () => {
+                  await deleteMutation.mutateAsync(item as formData);
+                },
               },
               {
                 popupTitle: "Edit User",
-                popupContent: items,
-                popupActionText: "Edit",
-                popupAction: () => {},
+                PopupContent: (
+                  <EditItems
+                    setEditFile={setFile}
+                    setData={setEditData}
+                    data={item as formData}
+                  />
+                ),
+                popupActionText: `${
+                  edit.isPending ? "Loading ... " : "Edit user"
+                }`,
+                popupAction: async () => {
+                  await edit.mutateAsync();
+                },
               },
             ]}
             btnText="Add User"
             mainPopup={{
               popupTitle: "Add User",
-              popupContent: items,
-              popupActionText: `${
-                addUserMutation.isPending ? "Loading ... " : "Add user"
-              }`,
+              PopupContent: (
+                <AddItems
+                  setAddFile={setFile}
+                  setData={setAddData}
+                  data={addData as formData}
+                />
+              ),
+              popupActionText: `${add.isPending ? "Loading ... " : "Add user"}`,
               popupAction: async () => {
-                await addUserMutation.mutateAsync();
+                await add.mutateAsync();
               },
             }}
-            data={[{ id: "1" }]}
+            data={data ?? [{}]}
             panelTitle="Users"
             filterContent={(handleChange, idChange) => (
               <>
@@ -346,5 +316,416 @@ function ClientUsers({ data }: { data: any[] }) {
     </div>
   );
 }
+const AddItems = ({
+  data,
+  setData,
+  setAddFile,
+}: {
+  data: formData;
+  setData: Dispatch<SetStateAction<formData | Record<string, any>>>;
+  setAddFile: Dispatch<SetStateAction<File | null>>;
+}) => {
+  const [file, setFile] = useState<File | null>(null);
+  const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
+
+  const [formData, setFormData] = useState<formData | Record<string, any>>(
+    data
+  );
+
+  useEffect(() => {
+    setData(formData);
+  }, [formData]);
+
+  useEffect(() => {
+    setAddFile(file);
+  }, [file]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { id, value, type } = e.target;
+    if (type === "file") {
+      const currentFile = e.target.files?.[0] ?? null;
+      setFile(currentFile);
+      if (currentFile) {
+        const tempUrl = URL.createObjectURL(currentFile);
+        setTempImageUrl(tempUrl);
+
+        setFormData((prev) => ({
+          ...prev,
+          fileName: currentFile.name,
+        }));
+      }
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [id]: value,
+      }));
+    }
+  };
+
+  const itemsArr: FormItem<keyof formData>[] = [
+    {
+      key: "image_url",
+      text: "Image",
+      item: (inputData: string, handleChange) => (
+        <div className="relative">
+          <input
+            id="image_url"
+            className="absolute left-0 h-full w-full opacity-0"
+            type="file"
+            onChange={handleChange}
+          />
+          {tempImageUrl ? (
+            <Image
+              alt="user profile"
+              width={200}
+              height={200}
+              src={tempImageUrl}
+            />
+          ) : (
+            <FontAwesomeIcon
+              className="text-8xl bg-gray-300 text-gray-400 p-4"
+              icon={faUser}
+            />
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "name",
+      text: "Name",
+      item: (inputData: string, handleChange) => (
+        <input
+          id="name"
+          className="bg-gray-100 border-none"
+          type="text"
+          placeholder="Name"
+          value={inputData}
+          onChange={handleChange}
+        />
+      ),
+    },
+    {
+      key: "email",
+      text: "Email",
+      item: (inputData: string, handleChange) => (
+        <input
+          id="email"
+          className="bg-gray-100 border-none"
+          type="text"
+          placeholder="Email"
+          value={inputData}
+          onChange={handleChange}
+        />
+      ),
+    },
+    {
+      key: "password",
+      text: "Password",
+      item: (inputData: string) => (
+        <input
+          id="password"
+          className="bg-gray-100 border-none"
+          type="password"
+          placeholder="Password"
+          value={inputData}
+          onChange={handleChange}
+        />
+      ),
+    },
+    {
+      key: "confirmPassword",
+      text: "Confirm Password",
+      item: (inputData: string) => (
+        <input
+          id="confirmPassword"
+          className="bg-gray-100 border-none"
+          type="password"
+          placeholder="Confirm password"
+          value={inputData}
+          onChange={handleChange}
+        />
+      ),
+    },
+    {
+      key: "mobile",
+      text: "Mobile",
+      item: (inputData: string) => (
+        <input
+          id="mobile"
+          className="bg-gray-100 border-none"
+          type="text"
+          placeholder="Mobile"
+          value={inputData}
+          onChange={handleChange}
+        />
+      ),
+    },
+    {
+      key: "gender",
+      text: "Gender",
+      item: (inputData: string) => (
+        <select
+          id="gender"
+          className="bg-gray-100 border-none"
+          value={inputData}
+          onChange={handleChange}
+        >
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+      ),
+    },
+    {
+      key: "status",
+      text: "Status",
+      item: (inputData: string) => (
+        <select
+          id="status"
+          className="bg-gray-100 border-none"
+          value={inputData}
+          onChange={handleChange}
+        >
+          <option value="Sick">Sick</option>
+          <option value="Good">Good</option>
+        </select>
+      ),
+    },
+    {
+      key: "date",
+      text: "Birthday",
+      item: (inputData: string) => (
+        <input
+          id="date"
+          className="bg-gray-100 border-none"
+          type="date"
+          value={inputData}
+          onChange={handleChange}
+        />
+      ),
+    },
+    {
+      key: "diseases",
+      text: "Diseases",
+      item: (inputData: string) => (
+        <select
+          id="diseases"
+          className="bg-gray-100 border-none"
+          value={inputData}
+          onChange={handleChange}
+        >
+          <option value="d1">Disease 1</option>
+          <option value="d2">Disease 2</option>
+        </select>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      {itemsArr?.map((item, i) => (
+        <div key={i} className="flex items-center py-4 gap-4 justify-between">
+          <div className="text-gray-700">{item.text}</div>
+          <div className="flex-1 md:min-w-[400px] max-w-[400px]">
+            {item.item(formData[item.key] || "", handleChange)}
+          </div>
+        </div>
+      ))}
+    </>
+  );
+};
+
+const EditItems = ({
+  data,
+  setData,
+  setEditFile,
+}: {
+  data: formData;
+  setData: Dispatch<SetStateAction<formData | Record<string, any>>>;
+  setEditFile: Dispatch<SetStateAction<File | null>>;
+}) => {
+  const [file, setFile] = useState<File | null>(null);
+  const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
+
+  const [formData, setFormData] = useState<formData | Record<string, any>>(
+    data
+  );
+
+  useEffect(() => {
+    setData(formData);
+  }, [formData]);
+
+  useEffect(() => {
+    setEditFile(file);
+  }, [file]);
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    item?: Record<string, any>
+  ) => {
+    const { id, value, type } = e.target;
+    if (type === "file") {
+      const currentFile = e.target.files?.[0] ?? null;
+      setFile(currentFile);
+      if (currentFile) {
+        const tempUrl = URL.createObjectURL(currentFile);
+        setTempImageUrl(tempUrl);
+
+        setFormData((prev) => ({
+          ...prev,
+          fileName: currentFile.name,
+        }));
+      }
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [id]: value,
+      }));
+    }
+  };
+
+  const itemsArr: FormItem<keyof formData>[] = [
+    {
+      key: "image_url",
+      text: "Image",
+      item: (inputData: string, handleChange) => (
+        <div className="relative">
+          <input
+            id="image_url"
+            className="absolute left-0 h-full w-full opacity-0"
+            type="file"
+            onChange={handleChange}
+          />
+          {tempImageUrl ? (
+            <Image
+              alt="user profile"
+              width={200}
+              height={200}
+              src={tempImageUrl}
+            />
+          ) : (
+            <FontAwesomeIcon
+              className="text-8xl bg-gray-300 text-gray-400 p-4"
+              icon={faUser}
+            />
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "name",
+      text: "Name",
+      item: (inputData: string, handleChange) => (
+        <input
+          id="name"
+          className="bg-gray-100 border-none"
+          type="text"
+          placeholder="Name"
+          value={inputData}
+          onChange={handleChange}
+        />
+      ),
+    },
+    {
+      key: "email",
+      text: "Email",
+      item: (inputData: string, handleChange) => (
+        <input
+          id="email"
+          className="bg-gray-100 border-none"
+          type="text"
+          placeholder="Email"
+          value={inputData}
+          onChange={handleChange}
+        />
+      ),
+    },
+    {
+      key: "mobile",
+      text: "Mobile",
+      item: (inputData: string) => (
+        <input
+          id="mobile"
+          className="bg-gray-100 border-none"
+          type="text"
+          placeholder="Mobile"
+          value={inputData}
+          onChange={handleChange}
+        />
+      ),
+    },
+    {
+      key: "gender",
+      text: "Gender",
+      item: (inputData: string) => (
+        <select
+          id="gender"
+          className="bg-gray-100 border-none"
+          value={inputData}
+          onChange={handleChange}
+        >
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+      ),
+    },
+    {
+      key: "status",
+      text: "Status",
+      item: (inputData: string) => (
+        <select
+          id="status"
+          className="bg-gray-100 border-none"
+          value={inputData}
+          onChange={handleChange}
+        >
+          <option value="Sick">Sick</option>
+          <option value="Good">Good</option>
+        </select>
+      ),
+    },
+    {
+      key: "date",
+      text: "Birthday",
+      item: (inputData: string) => (
+        <input
+          id="date"
+          className="bg-gray-100 border-none"
+          type="date"
+          value={inputData}
+          onChange={handleChange}
+        />
+      ),
+    },
+    {
+      key: "diseases",
+      text: "Diseases",
+      item: (inputData: string) => (
+        <select
+          id="diseases"
+          className="bg-gray-100 border-none"
+          value={inputData}
+          onChange={handleChange}
+        >
+          <option value="d1">Disease 1</option>
+          <option value="d2">Disease 2</option>
+        </select>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      {itemsArr?.map((item, i) => (
+        <div key={i} className="flex items-center py-4 gap-4 justify-between">
+          <div className="text-gray-700">{item.text}</div>
+          <div className="flex-1 md:min-w-[400px] max-w-[400px]">
+            {item.item(formData[item.key] || "", handleChange)}
+          </div>
+        </div>
+      ))}
+    </>
+  );
+};
 
 export default ClientUsers;
