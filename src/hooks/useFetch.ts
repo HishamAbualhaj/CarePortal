@@ -1,15 +1,17 @@
 interface Response {
   status: boolean;
-  msg: string;
+  msg: string | Record<string, any>;
 }
 async function useFetch(
   apiUrl: string,
   method: string,
-  data?: Record<string, any>
+  data?: Record<string, any>,
+  token?: string
 ): Promise<Response> {
   const res = await fetch(apiUrl, {
     method: method,
     headers: {
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     body: ["POST", "PUT", "DELETE", "PATCH"].includes(method.toUpperCase())
