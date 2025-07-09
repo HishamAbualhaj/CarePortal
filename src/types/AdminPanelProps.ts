@@ -1,4 +1,4 @@
-import { Dispatch, ReactNode, SetStateAction } from "react";
+import { Dispatch, JSX, ReactNode, SetStateAction } from "react";
 import { tableProps } from "./TableTypes";
 
 export interface adminPanelProps extends tableProps {
@@ -16,7 +16,7 @@ export interface adminPanelProps extends tableProps {
 
 export interface PopupProps {
   popupTitle?: string;
-  popupContent?: { text: string; item: ReactNode; data?: string }[] | string;
+  PopupContent: React.ReactNode | (() => JSX.Element);
   popupActionText?: string;
   popupAction?: () => void;
 }

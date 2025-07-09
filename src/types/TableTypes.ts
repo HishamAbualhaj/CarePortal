@@ -11,6 +11,6 @@ export interface tableProps {
         actionFn: (() => void) | Dispatch<SetStateAction<PopupProps | null>>,
         tablePopup?: PopupProps[]
       ) => ReactNode);
-  data: any[];
+  data: Record<string, any>;
   tablePopup?: (id?: Record<string, any>) => PopupProps[];
 }
