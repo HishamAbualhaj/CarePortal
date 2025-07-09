@@ -1,17 +1,17 @@
 import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { Dispatch, SetStateAction } from "react";
-
+import { formData } from "@/app/admin/users/ClientUsers";
 import { PopupProps } from "@/types/AdminPanelProps";
 
 interface ComponentProps {
-  item: {};
+  item: Record<string, any>;
   tablePopup?: PopupProps[];
   setPopUp: Dispatch<SetStateAction<PopupProps | null>>;
   btns: Array<"edit" | "delete">;
 }
 function ActionButtons({
-  item: {},
+  item,
   setPopUp,
   tablePopup,
   btns,
@@ -19,6 +19,7 @@ function ActionButtons({
   const handleClick = (type: "edit" | "delete") => {
     const index = type === "edit" ? 1 : 0;
     const popup = tablePopup?.[index];
+
     if (popup) setPopUp(popup);
   };
 
