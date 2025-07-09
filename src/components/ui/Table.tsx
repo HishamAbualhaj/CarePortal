@@ -4,8 +4,8 @@ import React, { ReactNode, useEffect, useState } from "react";
 import { tableProps, colType } from "@/types/TableTypes";
 import Popup from "./Popup";
 import { PopupProps } from "@/types/AdminPanelProps";
+import Image from "next/image";
 
-interface ComponentProps extends tableProps {}
 function Table({ columns, customAction, data, tablePopup }: tableProps) {
   const [isPop, setPopUp] = useState<PopupProps | null>(null);
 
@@ -14,7 +14,7 @@ function Table({ columns, customAction, data, tablePopup }: tableProps) {
       {isPop && (
         <Popup
           popupTitle={isPop.popupTitle}
-          popupContent={isPop.popupContent}
+          PopupContent={isPop.PopupContent}
           popupActionText={isPop.popupActionText}
           popupAction={isPop.popupAction}
           setPopup={setPopUp}
@@ -45,7 +45,20 @@ function Table({ columns, customAction, data, tablePopup }: tableProps) {
                         key={i}
                         className="text-nowrap border border-gray-300 p-5"
                       >
-                        {item[col.key]}
+                        {col.key === "image_url" ? (
+                          item[col.key] ? (
+                            <Image
+                              alt="image"
+                              width={200}
+                              height={200}
+                              src={item[col.key]}
+                            />
+                          ) : (
+                            "No Image"
+                          )
+                        ) : (
+                          item[col.key]
+                        )}
                       </td>
                     )
                   )}
