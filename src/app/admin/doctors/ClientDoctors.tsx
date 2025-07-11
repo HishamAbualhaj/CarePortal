@@ -112,7 +112,7 @@ function ClientDoctors() {
     "Doctor added successfully!",
     userToken
   );
-  const { data } = useQuery({
+  const { data, refetch } = useQuery({
     queryKey: ["doctors"],
     queryFn: async () => {
       return await useFetch("/api/getDoctors", "GET", {}, userToken);
@@ -155,9 +155,10 @@ function ClientDoctors() {
                   setAddFile={setFile}
                 />
               ),
-              popupActionText: "Add",
+              popupActionText: `${add.isPending ? "Loading ..." : "Add"}`,
               popupAction: async () => {
                 await add.mutateAsync();
+                refetch();
               },
             }}
             data={typeof data?.msg === "string" ? [] : data?.msg ?? []}

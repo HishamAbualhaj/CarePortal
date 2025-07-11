@@ -18,6 +18,7 @@ import React, {
 import { toast, ToastContainer } from "react-toastify";
 
 function ClientMessages() {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const user = useContext(AuthContext);
   const [userToken, setUserToken] = useState<string>("");
   useEffect(() => {
@@ -103,6 +104,12 @@ function ClientMessages() {
     enabled: !!userToken,
   });
 
+  useEffect(() => {
+    setIsLoading(edit.isPending);
+  }, [edit.isPending]);
+  useEffect(() => {
+    setIsLoading(deleteMessage.isPending);
+  }, [deleteMessage.isPending]);
   return (
     <div className="flex h-screen">
       <ToastContainer position="top-right" autoClose={3000} />
@@ -180,6 +187,7 @@ function ClientMessages() {
                 />
               </>
             )}
+            isPending={isLoading}
           />
         </div>
       </div>

@@ -17,6 +17,8 @@ import { Response } from "@/types/adminTypes";
 import { toast, ToastContainer } from "react-toastify";
 import { useMutation, useQuery } from "@tanstack/react-query";
 function ClientAppointments() {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const user = useContext(AuthContext);
   const [userToken, setUserToken] = useState<string>("");
   useEffect(() => {
@@ -146,13 +148,20 @@ function ClientAppointments() {
     );
   };
 
-  const { data } = useQuery({
+  const { data, refetch } = useQuery({
     queryKey: ["appointments"],
     queryFn: async () => {
       return await useFetch("/api/getAppointment", "GET", {}, userToken);
     },
     enabled: !!userToken,
   });
+
+  useEffect(() => {
+    setIsLoading(edit.isPending);
+  }, [edit.isPending]);
+  useEffect(() => {
+    setIsLoading(deleteMutation.isPending);
+  }, [deleteMutation.isPending]);
 
   return (
     <div className="flex h-screen">
@@ -191,6 +200,7 @@ function ClientAppointments() {
                 popupActionText: "Delete",
                 popupAction: async () => {
                   await deleteMutation.mutateAsync(item as formAppointment);
+                  refetch();
                 },
               },
               {
@@ -201,9 +211,10 @@ function ClientAppointments() {
                     setData={setEditAppointment}
                   />
                 ),
-                popupActionText: `${edit.isPending ? "Loading ..." : "Edit"}`,
+                popupActionText: "Edit",
                 popupAction: async () => {
                   await edit.mutateAsync();
+                  refetch();
                 },
               },
             ]}
@@ -214,7 +225,7 @@ function ClientAppointments() {
               PopupContent: (
                 <AddItems data={addAppointment} setData={setAddAppointment} />
               ),
-              popupActionText: "Add",
+              popupActionText: `${add.isPending ? "Loading ..." : "Add"}`,
               popupAction: async () => {
                 await add.mutateAsync();
               },
@@ -244,6 +255,7 @@ function ClientAppointments() {
                 />
               </>
             )}
+            isPending={isLoading}
           />
         </div>
       </div>

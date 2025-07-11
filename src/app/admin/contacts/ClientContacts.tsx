@@ -9,6 +9,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import useFetch from "@/hooks/useFetch";
 import { toast, ToastContainer } from "react-toastify";
 function ClientContacts() {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const user = useContext(AuthContext);
   const [userToken, setUserToken] = useState<string>("");
   useEffect(() => {
@@ -58,13 +60,18 @@ function ClientContacts() {
     userToken,
     "delete"
   );
-  const { data } = useQuery({
+  const { data, refetch } = useQuery({
     queryKey: ["contacts"],
     queryFn: async () => {
       return await useFetch("/api/getContacts", "GET", {}, userToken);
     },
     enabled: !!userToken,
   });
+
+  useEffect(() => {
+    setIsLoading(deleteMutation.isPending);
+  }, [deleteMutation.isPending]);
+
   return (
     <div className="flex h-screen">
       <ToastContainer position="top-right" autoClose={3000} />
@@ -102,6 +109,7 @@ function ClientContacts() {
                 popupActionText: "Delete",
                 popupAction: async () => {
                   await deleteMutation.mutateAsync(item as formContact);
+                  refetch();
                 },
               },
             ]}
@@ -122,6 +130,7 @@ function ClientContacts() {
                 />
               </>
             )}
+            isPending={isLoading}
           />
         </div>
       </div>

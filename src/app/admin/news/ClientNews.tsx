@@ -21,6 +21,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import useUpload from "@/hooks/useUpload";
 import useFetch from "@/hooks/useFetch";
 function ClientNews() {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const user = useContext(AuthContext);
   const [userToken, setUserToken] = useState<string>("");
   useEffect(() => {
@@ -153,6 +154,12 @@ function ClientNews() {
     enabled: !!userToken,
   });
 
+  useEffect(() => {
+    setIsLoading(edit.isPending);
+  }, [edit.isPending]);
+  useEffect(() => {
+    setIsLoading(deleteMutation.isPending);
+  }, [deleteMutation.isPending]);
   return (
     <div className="flex h-screen">
       <ToastContainer position="top-right" autoClose={3000} />
@@ -250,7 +257,7 @@ function ClientNews() {
                 />
               </>
             )}
-            isPending={edit.isPending}
+            isPending={isLoading}
           />
         </div>
       </div>
