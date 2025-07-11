@@ -19,4 +19,5 @@ export interface PopupProps {
   PopupContent: React.ReactNode | (() => JSX.Element);
   popupActionText?: string;
   popupAction?: () => void;
+  isPending?: boolean;
 }

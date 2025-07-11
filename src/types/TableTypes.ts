@@ -13,4 +13,5 @@ export interface tableProps {
       ) => ReactNode);
   data: Record<string, any>;
   tablePopup?: (id?: Record<string, any>) => PopupProps[];
+  isPending?: boolean;
 }
