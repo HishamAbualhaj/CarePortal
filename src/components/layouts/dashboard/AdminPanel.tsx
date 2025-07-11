@@ -8,7 +8,7 @@ import {
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import Popup from "@/components/ui/Popup";
 import { adminPanelProps, PopupProps } from "@/types/AdminPanelProps";
 function AdminPanel({
@@ -20,6 +20,7 @@ function AdminPanel({
   mainPopup,
   data,
   filterContent,
+  isPending,
   filterAction,
 }: adminPanelProps) {
   const [filter, setFilter] = useState<boolean>(false);
@@ -101,6 +102,7 @@ function AdminPanel({
                 customAction={customAction}
                 data={data}
                 tablePopup={tablePopup}
+                isPending={isPending}
               />
             </div>
             <div className="flex justify-end pt-5">

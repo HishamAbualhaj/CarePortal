@@ -6,7 +6,13 @@ import Popup from "./Popup";
 import { PopupProps } from "@/types/AdminPanelProps";
 import Image from "next/image";
 
-function Table({ columns, customAction, data, tablePopup }: tableProps) {
+function Table({
+  columns,
+  customAction,
+  data,
+  tablePopup,
+  isPending,
+}: tableProps) {
   const [isPop, setPopUp] = useState<PopupProps | null>(null);
 
   return (
@@ -18,6 +24,7 @@ function Table({ columns, customAction, data, tablePopup }: tableProps) {
           popupActionText={isPop.popupActionText}
           popupAction={isPop.popupAction}
           setPopup={setPopUp}
+          isPending={isPending}
         />
       )}
       <table className="border border-collapse w-full">

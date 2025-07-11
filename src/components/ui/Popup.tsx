@@ -11,6 +11,7 @@ function Popup({
   popupAction,
   popupActionText,
   setPopup,
+  isPending,
 }: ComponentProps) {
   return (
     <div
@@ -34,7 +35,10 @@ function Popup({
 
         <div className="px-5 border-t p-5 border-gray-300">
           <div className="flex justify-end gap-5">
-            <Button onClick={popupAction} text={popupActionText} />
+            <Button
+              onClick={popupAction}
+              text={`${isPending ? "Loading ..." : popupActionText}`}
+            />
             <Button
               onClick={() => {
                 setPopup(null);
