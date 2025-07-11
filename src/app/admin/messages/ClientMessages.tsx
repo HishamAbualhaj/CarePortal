@@ -1,12 +1,108 @@
 "use client";
+import { handleChange } from "@/app/helpers/handleInputChange";
 import ActionButtons from "@/components/layouts/dashboard/ActionButtons";
 import AdminPanel from "@/components/layouts/dashboard/AdminPanel";
 import SideBar from "@/components/layouts/dashboard/SideBar";
-import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React from "react";
+import { AuthContext } from "@/context/AuthContextUser";
+import useFetch from "@/hooks/useFetch";
+import { FormItem, formMessage } from "@/types/adminTypes";
+import { Response } from "@/types/adminTypes";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { toast } from "react-toastify";
 
-function ClientMessages({ data }: { data: any[] }) {
+function ClientMessages() {
+  const user = useContext(AuthContext);
+  const [userToken, setUserToken] = useState<string>("");
+  useEffect(() => {
+    setUserToken(user?.user?.token ?? "");
+  }, [user]);
+
+  const [editMessage, setEditMessage] = useState<
+    formMessage | Record<string, any>
+  >({
+    doctor_id: "",
+    patient_id: "",
+    reply: "",
+  });
+
+  const useMessageMutation = (
+    apiFn: (
+      url: string | null,
+      token: string,
+      data?: formMessage
+    ) => Promise<Response>,
+    stateData: formMessage | Record<string, any>,
+    text: string,
+    token: string,
+    type?: string
+  ) => {
+    return useMutation({
+      mutationFn: async (data?: formMessage): Promise<Response> => {
+        if (type === "delete") {
+          return await apiFn("", token, data);
+        }
+        if (!stateData.reply) {
+          toast.error("Fields are required");
+          return {} as Response;
+        }
+        return await apiFn("", token);
+      },
+      onSuccess: (data) => {
+        if (!data || Object.keys(data).length === 0) return;
+        if (data.status) {
+          toast.success(text);
+          return;
+        }
+        if (typeof data?.msg === "string") toast.error(data?.msg || text);
+      },
+      onError: () => {
+        toast.error("Something went wrong!");
+      },
+    });
+  };
+
+  const editMessageFn = async (
+    url: string | null,
+    token: string
+  ): Promise<Response> => {
+    return await useFetch("/api/editMessage", "PUT", editMessage, token);
+  };
+
+  const deleteMessageFn = async (
+    url: string | null,
+    token: string
+  ): Promise<Response> => {
+    return await useFetch("/api/deleteMessage", "DELETE", {}, token);
+  };
+  const edit = useMessageMutation(
+    editMessageFn,
+    editMessage,
+    "Message Edited successfully",
+    userToken
+  );
+
+  const deleteMessage = useMessageMutation(
+    deleteMessageFn,
+    {},
+    "Message Deleted successfully",
+    userToken,
+    "delete"
+  );
+  const { data } = useQuery({
+    queryKey: ["messages"],
+    queryFn: async () => {
+      return await useFetch("/api/getMessages", "GET", {}, userToken);
+    },
+    enabled: !!userToken,
+  });
+
   return (
     <div className="flex h-screen">
       <SideBar />
@@ -24,7 +120,7 @@ function ClientMessages({ data }: { data: any[] }) {
               { key: "action", label: "Actions" },
             ]}
             panelTitle="Messages"
-            data={[{ id: "1" }]}
+            data={typeof data?.msg === "string" ? [] : data?.msg ?? []}
             customAction={(item, setPopUp, tablePopup) => (
               <ActionButtons
                 item={item}
@@ -33,18 +129,31 @@ function ClientMessages({ data }: { data: any[] }) {
                 btns={["edit", "delete"]}
               />
             )}
-            tablePopup={() => [
+            tablePopup={(item) => [
               {
                 popupTitle: "Delete Message",
-                popupContent: "Are you sure you want to delete this message?",
+                PopupContent: (
+                  <div className="text-xl py-5">
+                    Are you sure you want to delete this message?
+                  </div>
+                ),
                 popupActionText: "Delete",
-                popupAction: () => {},
+                popupAction: async () => {
+                  await deleteMessage.mutateAsync(item as formMessage);
+                },
               },
               {
                 popupTitle: "Edit Message",
-                popupContent: [{ text: "", item: "", data: "" }],
+                PopupContent: (
+                  <EditItems
+                    data={item as formMessage}
+                    setData={setEditMessage}
+                  />
+                ),
                 popupActionText: "Edit",
-                popupAction: () => {},
+                popupAction: async () => {
+                  await edit.mutateAsync(undefined);
+                },
               },
             ]}
             filterContent={(handleChange, idChange) => (
@@ -77,5 +186,48 @@ function ClientMessages({ data }: { data: any[] }) {
     </div>
   );
 }
+const EditItems = ({
+  data,
+  setData,
+}: {
+  data: formMessage | Record<string, any>;
+  setData: Dispatch<SetStateAction<formMessage | Record<string, any>>>;
+}) => {
+  const Items: FormItem<formMessage, keyof formMessage>[] = [
+    {
+      key: "reply",
+      text: "Reply",
+      item: (inputData: string, handleChange) => (
+        <textarea
+          id="reply"
+          onChange={handleChange}
+          value={inputData}
+          className="bg-gray-100 border-none"
+          placeholder="Message"
+        />
+      ),
+    },
+  ];
+  const [formData, setFormData] = useState<formMessage | Record<string, any>>(
+    data
+  );
+  useEffect(() => {
+    setData(formData);
+  }, [formData]);
+  return (
+    <>
+      {Items?.map((item, i) => (
+        <div key={i} className="flex items-center py-4 gap-4 justify-between">
+          <div className="text-gray-700">{item.text}</div>
+          <div className="flex-1 md:min-w-[400px] max-w-[400px]">
+            {item.item(formData[item.key] || "", (e) => {
+              handleChange(e, setFormData);
+            })}
+          </div>
+        </div>
+      ))}
+    </>
+  );
+};
 
 export default ClientMessages;
