@@ -36,15 +36,36 @@ export type formDoctor = {
 };
 
 export type formAppointment = {
+  id: string;
   doctor_id: string;
   patient_id: string;
   doctor: string;
   date: string;
   time: string;
   status: string;
-  message:string;
+  message: string;
 };
 
+export type formMessage = {
+  id: string;
+  doctor_id: string;
+  patient_id: string;
+  doctor: string;
+  patient: string;
+  message: string;
+  reply: string;
+};
+
+export type formContact = {
+  id: string;
+  patient_id: string;
+  doctor_id: string;
+  doctor: string;
+  patient: string;
+  subject: string;
+  message: string;
+  sent_at: string;
+};
 export type FormItem<T, K extends keyof T> = {
   key: K;
   text: string;
