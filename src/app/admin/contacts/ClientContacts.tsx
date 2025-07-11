@@ -7,7 +7,7 @@ import { AuthContext } from "@/context/AuthContextUser";
 import { formContact, Response } from "@/types/adminTypes";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import useFetch from "@/hooks/useFetch";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 function ClientContacts() {
   const user = useContext(AuthContext);
   const [userToken, setUserToken] = useState<string>("");
@@ -67,8 +67,8 @@ function ClientContacts() {
   });
   return (
     <div className="flex h-screen">
+      <ToastContainer position="top-right" autoClose={3000} />
       <SideBar />
-
       <div className="flex-1 w-full bg-secondary">
         <div className="bg-white py-[34px] shadow-main"></div>
         <div className="mt-5">

@@ -15,7 +15,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 function ClientMessages() {
   const user = useContext(AuthContext);
@@ -105,8 +105,8 @@ function ClientMessages() {
 
   return (
     <div className="flex h-screen">
+      <ToastContainer position="top-right" autoClose={3000} />
       <SideBar />
-
       <div className="flex-1 w-full bg-secondary">
         <div className="bg-white py-[34px] shadow-main"></div>
         <div className="mt-5">

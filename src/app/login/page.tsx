@@ -1,13 +1,14 @@
 "use client";
 import Button from "@/components/ui/Button";
-import Modal from "@/components/ui/Modal";
-import { auth, db } from "@/firebase/config";
+
+import { auth } from "@/firebase/config";
 import { useMutation } from "@tanstack/react-query";
 import { FirebaseError } from "firebase/app";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast, ToastContainer } from "react-toastify";
 function page() {
   const router = useRouter();
   const inputs = [
@@ -35,6 +36,16 @@ function page() {
   const { mutate, data, isPending } = useMutation({
     mutationKey: ["authUser"],
     mutationFn: login,
+    onSuccess: (data) => {
+      if (data?.status) {
+        toast.success(data.message);
+        return;
+      }
+      toast.error(data?.message);
+    },
+    onError: () => {
+      toast.error("Something went wrong");
+    },
   });
 
   const hanldeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,18 +53,20 @@ function page() {
 
     setUserData((prev) => ({ ...prev, [id]: value }));
   };
-  const [modal, setModal] = useState<boolean>(false);
 
   useEffect(() => {
-    if (data) {
-      setModal(true);
+    if (data?.status) {
+      toast.success(data.message);
       {
         data.status && router.push("/");
       }
+      return;
     }
+    toast.error(data?.message);
   }, [data]);
   return (
     <>
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className="flex h-screen ems-center">
         <div className="flex-1 bg-blue-100 flex justify-center items-center relative max-xl:hidden">
           <div className="text-2xl bg-white p-5 max-w-[550px] rounded-md leading-[35px] shadow-main">
@@ -113,9 +126,6 @@ function page() {
           </div>
         </div>
       </div>
-      {modal && (
-        <Modal text={data?.message} status={data?.status} setModel={setModal} />
-      )}
     </>
   );
 }

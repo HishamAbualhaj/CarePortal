@@ -8,8 +8,8 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/config";
 import { createDataDoc } from "@/firebase/db";
 import { FirebaseError } from "firebase/app";
-import Modal from "@/components/ui/Modal";
 import { useRouter } from "next/navigation";
+import { toast, ToastContainer } from "react-toastify";
 function page() {
   const router = useRouter();
   const [inputs, setInputs] = useState<Record<string, any>[]>([
@@ -44,6 +44,7 @@ function page() {
     address: "",
     status: true,
     isVerified: false,
+    role: "user",
   });
 
   const signup = async () => {
@@ -126,18 +127,19 @@ function page() {
     setInputs(newInputs);
   }, [userData.password, userData.confirmpass]);
 
-  const [modal, setModal] = useState<boolean>(false);
-
   useEffect(() => {
-    if (data) {
-      setModal(true);
+    if (data?.status) {
+      toast.success(data.message);
       {
         data.status && router.push("/");
       }
+      return;
     }
+    toast.error(data?.message);
   }, [data]);
   return (
     <>
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className="flex h-screen ems-center">
         <div className="flex-1 bg-blue-100 flex justify-center items-center relative max-xl:hidden">
           <div className="text-2xl bg-white p-5 max-w-[550px] rounded-md leading-[35px] shadow-main">
@@ -203,9 +205,6 @@ function page() {
           </div>
         </div>
       </div>
-      {modal && (
-        <Modal text={data?.message} status={data?.status} setModel={setModal} />
-      )}
     </>
   );
 }

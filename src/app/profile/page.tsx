@@ -11,7 +11,8 @@ import { useMutation } from "@tanstack/react-query";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import useUpload from "@/hooks/useUpload";
-import Modal from "@/components/ui/Modal";
+import { toast, ToastContainer } from "react-toastify";
+
 function page() {
   const dataContext = useContext(AuthContext);
 
@@ -108,18 +109,20 @@ function page() {
     setUserData((prev) => ({ ...prev, image_url }));
   };
 
-  const [modal, setModal] = useState<boolean>(false);
   useEffect(() => {
-    if (data) setModal(true);
+    if (data?.status) {
+      toast.success(data.message);
+      return;
+    }
+    toast.error(data?.message);
   }, [data]);
   return (
     <>
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className="shadow-main">
         <Header />
       </div>
-      {modal && (
-        <Modal text={data?.message} status={data?.status} setModel={setModal} />
-      )}
+
       <div className="max-container px-5 pb-10">
         <div className="text-4xl font-bold py-5 after:absolute after:left-0 relative after:bottom-0 after:bg-black/80 md:after:w-[500px] after:w-[300px] after:h-[2px] text-black/80">
           Profile
