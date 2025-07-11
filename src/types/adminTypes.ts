@@ -66,6 +66,16 @@ export type formContact = {
   message: string;
   sent_at: string;
 };
+
+export type formNews = {
+  id: string;
+  doctor: string;
+  image_url: string;
+  fileName: string;
+  title: string;
+  description: string;
+  date: string;
+};
 export type FormItem<T, K extends keyof T> = {
   key: K;
   text: string;
