@@ -1,11 +1,70 @@
 "use client";
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import AdminPanel from "@/components/layouts/dashboard/AdminPanel";
 import SideBar from "@/components/layouts/dashboard/SideBar";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import ActionButtons from "@/components/layouts/dashboard/ActionButtons";
-function ClientContacts({ data }: { data: any[] }) {
+import { AuthContext } from "@/context/AuthContextUser";
+import { formContact, Response } from "@/types/adminTypes";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import useFetch from "@/hooks/useFetch";
+import { toast } from "react-toastify";
+function ClientContacts() {
+  const user = useContext(AuthContext);
+  const [userToken, setUserToken] = useState<string>("");
+  useEffect(() => {
+    setUserToken(user?.user?.token ?? "");
+  }, [user]);
+
+  const useContactMutation = (
+    apiFn: (
+      url: string | null,
+      token: string,
+      data?: formContact
+    ) => Promise<Response>,
+    stateData: formContact | Record<string, any>,
+    text: string,
+    token: string,
+    type?: string
+  ) => {
+    return useMutation({
+      mutationFn: async (data?: formContact): Promise<Response> => {
+        if (type === "delete") {
+          return await apiFn("", token, data);
+        }
+
+        return await apiFn("", token);
+      },
+      onSuccess: (data) => {
+        if (!data || Object.keys(data).length === 0) return;
+        if (data.status) {
+          toast.success(text);
+          return;
+        }
+        if (typeof data?.msg === "string") toast.error(data?.msg || text);
+      },
+      onError: () => {
+        toast.error("Something went wrong!");
+      },
+    });
+  };
+  const deleteContact = async (url: string | null, token: string) => {
+    return await useFetch("/api/deleteContact", "DELETE", {}, token);
+  };
+
+  const deleteMutation = useContactMutation(
+    deleteContact,
+    {},
+    "Contact Message deleted",
+    userToken,
+    "delete"
+  );
+  const { data } = useQuery({
+    queryKey: ["contacts"],
+    queryFn: async () => {
+      return await useFetch("/api/getContacts", "GET", {}, userToken);
+    },
+    enabled: !!userToken,
+  });
   return (
     <div className="flex h-screen">
       <SideBar />
@@ -23,7 +82,7 @@ function ClientContacts({ data }: { data: any[] }) {
               { key: "action", label: "Actions" },
             ]}
             panelTitle="All Contacts Messages"
-            data={[{ id: "1" }]}
+            data={typeof data?.msg === "string" ? [] : data?.msg ?? []}
             customAction={(item, setPopUp, tablePopup) => (
               <ActionButtons
                 item={item}
@@ -32,12 +91,18 @@ function ClientContacts({ data }: { data: any[] }) {
                 btns={["delete"]}
               />
             )}
-            tablePopup={() => [
+            tablePopup={(item) => [
               {
                 popupTitle: "Delete Contact",
-                popupContent: "Are you sure you want to delete this contact?",
+                PopupContent: (
+                  <div className="text-xl py-5">
+                    Are you sure you want to delete this contact?
+                  </div>
+                ),
                 popupActionText: "Delete",
-                popupAction: () => {},
+                popupAction: async () => {
+                  await deleteMutation.mutateAsync(item as formContact);
+                },
               },
             ]}
             filterContent={(handleChange, idChange) => (
