@@ -23,6 +23,7 @@ import { handleChange } from "@/app/helpers/handleInputChange";
 import { Response } from "@/types/adminTypes";
 
 function ClientUsers() {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const user = useContext(AuthContext);
   const [userToken, setUserToken] = useState<string>("");
   useEffect(() => {
@@ -176,13 +177,19 @@ function ClientUsers() {
     userToken
   );
 
-  const { data } = useQuery({
+  const { data, refetch } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       return await useFetch("/api/getUsers", "GET", {}, userToken);
     },
     enabled: !!userToken,
   });
+  useEffect(() => {
+    setIsLoading(edit.isPending);
+  }, [edit.isPending]);
+  useEffect(() => {
+    setIsLoading(deleteMutation.isPending);
+  }, [deleteMutation.isPending]);
   return (
     <div className="flex h-screen">
       <ToastContainer position="top-right" autoClose={3000} />
@@ -222,6 +229,7 @@ function ClientUsers() {
                 popupActionText: "Delete",
                 popupAction: async () => {
                   await deleteMutation.mutateAsync(item as formData);
+                  refetch();
                 },
               },
               {
@@ -233,11 +241,10 @@ function ClientUsers() {
                     data={item as formData}
                   />
                 ),
-                popupActionText: `${
-                  edit.isPending ? "Loading ... " : "Edit user"
-                }`,
+                popupActionText: "Edit",
                 popupAction: async () => {
                   await edit.mutateAsync();
+                  refetch();
                 },
               },
             ]}
@@ -254,6 +261,7 @@ function ClientUsers() {
               popupActionText: `${add.isPending ? "Loading ... " : "Add user"}`,
               popupAction: async () => {
                 await add.mutateAsync();
+                refetch();
               },
             }}
             data={typeof data?.msg === "string" ? [] : data?.msg ?? []}
@@ -285,6 +293,7 @@ function ClientUsers() {
                 </select>
               </>
             )}
+            isPending={isLoading}
           />
         </div>
       </div>
@@ -527,11 +536,13 @@ const EditItems = ({
           />
           {tempImageUrl ? (
             <Image
-              alt="user profile"
+              alt="news image"
               width={200}
               height={200}
               src={tempImageUrl}
             />
+          ) : inputData ? (
+            <Image alt="news image" width={200} height={200} src={inputData} />
           ) : (
             <FontAwesomeIcon
               className="text-8xl bg-gray-300 text-gray-400 p-4"
