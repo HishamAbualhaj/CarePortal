@@ -1,5 +1,5 @@
 "use client";
-import { handleChange } from "@/app/helpers/handleInputChange";
+import { handleChange } from "../../../helpers/handleInputChange";
 import ActionButtons from "@/components/layouts/dashboard/ActionButtons";
 import AdminPanel from "@/components/layouts/dashboard/AdminPanel";
 import SideBar from "@/components/layouts/dashboard/SideBar";
@@ -24,8 +24,13 @@ function ClientNews() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const user = useContext(AuthContext);
   const [userToken, setUserToken] = useState<string>("");
+  const [userData, setUserData] = useState<Record<string, any>>({});
   useEffect(() => {
     setUserToken(user?.user?.token ?? "");
+    setUserData({
+      doctor: user?.user?.name,
+      doctor_id: user?.user?.uid,
+    });
   }, [user]);
   const [file, setFile] = useState<File | null>(null);
 
@@ -45,7 +50,11 @@ function ClientNews() {
   });
 
   const useNewsMutation = (
-    apiFn: (url: string | null, token: string) => Promise<Response>,
+    apiFn: (
+      url: string | null,
+      token: string,
+      userData: Record<string, any>
+    ) => Promise<Response>,
     stateData: formNews | Record<string, any>,
     text: string,
     token: string
@@ -61,7 +70,7 @@ function ClientNews() {
           url = (await useUpload(file)) || "";
         }
 
-        return await apiFn(url, token);
+        return await apiFn(url, token, userData);
       },
       onSuccess: (data) => {
         handleSuccess(data, text);
@@ -82,7 +91,8 @@ function ClientNews() {
   };
   const createNews = async (
     url: string | null,
-    token: string
+    token: string,
+    userData: Record<string, any>
   ): Promise<Response> => {
     return await useFetch(
       "/api/addNews",
@@ -90,6 +100,7 @@ function ClientNews() {
       {
         ...addData,
         image_url: url,
+        ...userData,
       },
       token
     );
@@ -332,12 +343,26 @@ const AddItems = ({
       ),
     },
     {
+      key: "subtitle",
+      text: "subtitle",
+      item: (inputData: string, handleChange) => (
+        <input
+          id="subtitle"
+          className="bg-gray-100 border-none"
+          type="text"
+          placeholder="Subtitle"
+          onChange={handleChange}
+          value={inputData}
+        />
+      ),
+    },
+    {
       key: "description",
       text: "Description",
       item: (inputData: string, handleChange) => (
         <textarea
           id="description"
-          className="bg-gray-100 border-none"
+          className="bg-gray-100 border-none min-h-[250px]"
           placeholder="Description"
           onChange={handleChange}
           value={inputData}
@@ -431,12 +456,26 @@ const EditItems = ({
       ),
     },
     {
+      key: "subtitle",
+      text: "subtitle",
+      item: (inputData: string, handleChange) => (
+        <input
+          id="subtitle"
+          className="bg-gray-100 border-none"
+          type="text"
+          placeholder="Subtitle"
+          onChange={handleChange}
+          value={inputData}
+        />
+      ),
+    },
+    {
       key: "description",
       text: "Description",
       item: (inputData: string, handleChange) => (
         <textarea
           id="description"
-          className="bg-gray-100 border-none"
+          className="bg-gray-100 border-none min-h-[250px]"
           placeholder="Description"
           onChange={handleChange}
           value={inputData}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDB } from "@/firebase/adminConfig";
 import withAuth from "@/lib/withAuth";
+import formatDate from "@/helpers/formDate";
 export async function POST(req: NextRequest) {
   try {
     return withAuth(req, async (user, req) => {
@@ -29,10 +30,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ status: false, msg: "Something went wrong" });
   }
 }
-
-const formatDate = (date: Date) => {
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-};
