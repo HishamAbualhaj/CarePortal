@@ -96,7 +96,7 @@ function AdminPanel({
               </select>
               <div className="tex">entries</div>
             </div>
-            <div className="overflow-auto">
+            <div className="overflow-auto h-[500px]">
               <Table
                 columns={columns}
                 customAction={customAction}

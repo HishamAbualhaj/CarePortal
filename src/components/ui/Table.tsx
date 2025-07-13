@@ -50,7 +50,7 @@ function Table({
                     col.key === "action" ? null : (
                       <td
                         key={i}
-                        className="text-nowrap border border-gray-300 p-5"
+                        className="text-wrap max-w-[400px] border border-gray-300 p-5"
                       >
                         {col.key === "image_url" ? (
                           item[col.key] ? (
