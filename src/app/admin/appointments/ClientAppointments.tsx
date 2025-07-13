@@ -11,7 +11,7 @@ import SideBar from "@/components/layouts/dashboard/SideBar";
 import ActionButtons from "@/components/layouts/dashboard/ActionButtons";
 import { AuthContext } from "@/context/AuthContextUser";
 import { formAppointment, FormItem } from "@/types/adminTypes";
-import { handleChange } from "@/app/helpers/handleInputChange";
+import { handleChange } from "../../../helpers/handleInputChange";
 import useFetch from "@/hooks/useFetch";
 import { Response } from "@/types/adminTypes";
 import { toast, ToastContainer } from "react-toastify";
@@ -156,6 +156,14 @@ function ClientAppointments() {
     enabled: !!userToken,
   });
 
+  const doctors = useQuery({
+    queryKey: ["doctors"],
+    queryFn: async () => {
+      return await useFetch("/api/getDoctors", "GET", {}, userToken);
+    },
+    enabled: !!userToken,
+  });
+
   useEffect(() => {
     setIsLoading(edit.isPending);
   }, [edit.isPending]);
@@ -207,6 +215,11 @@ function ClientAppointments() {
                 popupTitle: "Edit Appointment",
                 PopupContent: (
                   <EditItems
+                    doctorData={
+                      typeof doctors.data?.msg === "string"
+                        ? []
+                        : (doctors.data?.msg as Record<string, any>[]) ?? []
+                    }
                     data={item as formAppointment}
                     setData={setEditAppointment}
                   />
@@ -223,11 +236,20 @@ function ClientAppointments() {
             mainPopup={{
               popupTitle: "Add Appointment",
               PopupContent: (
-                <AddItems data={addAppointment} setData={setAddAppointment} />
+                <AddItems
+                  doctorData={
+                    typeof doctors.data?.msg === "string"
+                      ? []
+                      : (doctors.data?.msg as Record<string, any>[]) ?? []
+                  }
+                  data={addAppointment}
+                  setData={setAddAppointment}
+                />
               ),
               popupActionText: `${add.isPending ? "Loading ..." : "Add"}`,
               popupAction: async () => {
                 await add.mutateAsync();
+                refetch();
               },
             }}
             data={typeof data?.msg === "string" ? [] : data?.msg ?? []}
@@ -266,23 +288,29 @@ function ClientAppointments() {
 const AddItems = ({
   data,
   setData,
+  doctorData,
 }: {
   data: formAppointment | Record<string, any>;
   setData: Dispatch<SetStateAction<formAppointment | Record<string, any>>>;
+  doctorData?: Record<string, any>[];
 }) => {
   const Items: FormItem<formAppointment, keyof formAppointment>[] = [
     {
       key: "doctor_id",
       text: "Doctor",
-      item: (inputData: string, handleChange) => (
+      item: (inputData: string, handleChange, data) => (
         <select
           id="doctor_id"
           onChange={handleChange}
           value={inputData}
           className="bg-gray-100 border-none"
         >
-          <option value="Doctor 1">Doctor 1 </option>
-          <option value="Doctor 2">Doctor 2</option>
+          <option value="">Select Doctor</option>
+          {data?.map((item, i) => (
+            <option key={i} value={item.id}>
+              {item.name}
+            </option>
+          ))}
         </select>
       ),
     },
@@ -315,21 +343,27 @@ const AddItems = ({
       ),
     },
   ];
+
   const [formData, setFormData] = useState<
     formAppointment | Record<string, any>
   >(data);
   useEffect(() => {
     setData(formData);
   }, [formData]);
+
   return (
     <>
       {Items?.map((item, i) => (
         <div key={i} className="flex items-center py-4 gap-4 justify-between">
           <div className="text-gray-700">{item.text}</div>
           <div className="flex-1 md:min-w-[400px] max-w-[400px]">
-            {item.item(formData[item.key] || "", (e) => {
-              handleChange(e, setFormData);
-            })}
+            {item.item(
+              formData[item.key] || "",
+              (e) => {
+                handleChange(e, setFormData);
+              },
+              doctorData
+            )}
           </div>
         </div>
       ))}
@@ -340,23 +374,29 @@ const AddItems = ({
 const EditItems = ({
   data,
   setData,
+  doctorData,
 }: {
   data: formAppointment | Record<string, any>;
   setData: Dispatch<SetStateAction<formAppointment | Record<string, any>>>;
+  doctorData?: Record<string, any>[];
 }) => {
   const Items: FormItem<formAppointment, keyof formAppointment>[] = [
     {
       key: "doctor_id",
       text: "Doctor",
-      item: (inputData: string, handleChange) => (
+      item: (inputData: string, handleChange, data) => (
         <select
           id="doctor_id"
           onChange={handleChange}
           value={inputData}
           className="bg-gray-100 border-none"
         >
-          <option value="1">Doctor 1</option>
-          <option value="2">Doctor 2</option>
+          <option value="">Select Doctor</option>
+          {data?.map((item, i) => (
+            <option key={i} value={item.id}>
+              {item.name}
+            </option>
+          ))}
         </select>
       ),
     },
@@ -401,9 +441,13 @@ const EditItems = ({
         <div key={i} className="flex items-center py-4 gap-4 justify-between">
           <div className="text-gray-700">{item.text}</div>
           <div className="flex-1 md:min-w-[400px] max-w-[400px]">
-            {item.item(formData[item.key] || "", (e) => {
-              handleChange(e, setFormData);
-            })}
+            {item.item(
+              formData[item.key] || "",
+              (e) => {
+                handleChange(e, setFormData);
+              },
+              doctorData
+            )}
           </div>
         </div>
       ))}
