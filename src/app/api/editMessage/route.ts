@@ -15,8 +15,10 @@ export async function PUT(req: NextRequest) {
         );
       }
       const body = await req.json();
-
-      await adminDB.collection("messages").doc(body.id).update(body);
+      await adminDB
+        .collection("messages")
+        .doc(body.id)
+        .update({ reply: body?.reply ?? "" });
 
       return NextResponse.json({
         status: true,
