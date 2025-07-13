@@ -1,5 +1,5 @@
 "use client";
-import { handleChange } from "@/app/helpers/handleInputChange";
+import { handleChange } from "../../../helpers/handleInputChange";
 import ActionButtons from "@/components/layouts/dashboard/ActionButtons";
 import AdminPanel from "@/components/layouts/dashboard/AdminPanel";
 import SideBar from "@/components/layouts/dashboard/SideBar";

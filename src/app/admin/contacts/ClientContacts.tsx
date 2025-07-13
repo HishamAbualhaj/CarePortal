@@ -21,20 +21,19 @@ function ClientContacts() {
     apiFn: (
       url: string | null,
       token: string,
-      data?: formContact
+      data: formContact
     ) => Promise<Response>,
-    stateData: formContact | Record<string, any>,
     text: string,
     token: string,
     type?: string
   ) => {
     return useMutation({
-      mutationFn: async (data?: formContact): Promise<Response> => {
+      mutationFn: async (data: formContact): Promise<Response> => {
         if (type === "delete") {
           return await apiFn("", token, data);
         }
 
-        return await apiFn("", token);
+        return await apiFn("", token, {} as formContact);
       },
       onSuccess: (data) => {
         if (!data || Object.keys(data).length === 0) return;
@@ -49,13 +48,16 @@ function ClientContacts() {
       },
     });
   };
-  const deleteContact = async (url: string | null, token: string) => {
-    return await useFetch("/api/deleteContact", "DELETE", {}, token);
+  const deleteContact = async (
+    url: string | null,
+    token: string,
+    data: formContact
+  ) => {
+    return await useFetch("/api/deleteContact", "DELETE", data, token);
   };
 
   const deleteMutation = useContactMutation(
     deleteContact,
-    {},
     "Contact Message deleted",
     userToken,
     "delete"
@@ -63,7 +65,7 @@ function ClientContacts() {
   const { data, refetch } = useQuery({
     queryKey: ["contacts"],
     queryFn: async () => {
-      return await useFetch("/api/getContacts", "GET", {}, userToken);
+      return await useFetch("/api/getContact", "GET", {}, userToken);
     },
     enabled: !!userToken,
   });
@@ -108,6 +110,7 @@ function ClientContacts() {
                 ),
                 popupActionText: "Delete",
                 popupAction: async () => {
+                  console.log(item);
                   await deleteMutation.mutateAsync(item as formContact);
                   refetch();
                 },
