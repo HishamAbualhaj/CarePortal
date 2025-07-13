@@ -19,7 +19,7 @@ import useUpload from "@/hooks/useUpload";
 import Image from "next/image";
 import { AuthContext } from "@/context/AuthContextUser";
 import { formUser as formData, FormItem } from "@/types/adminTypes";
-import { handleChange } from "@/app/helpers/handleInputChange";
+import { handleChange } from "../../../helpers/handleInputChange";
 import { Response } from "@/types/adminTypes";
 
 function ClientUsers() {

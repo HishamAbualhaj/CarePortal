@@ -12,7 +12,7 @@ import React, {
 } from "react";
 import { FormItem, formDoctor } from "@/types/adminTypes";
 import Image from "next/image";
-import { handleChange } from "@/app/helpers/handleInputChange";
+import { handleChange } from "../../../helpers/handleInputChange";
 import { AuthContext } from "@/context/AuthContextUser";
 import { toast, ToastContainer } from "react-toastify";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -120,9 +120,6 @@ function ClientDoctors() {
     enabled: !!userToken,
   });
 
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
   return (
     <div className="flex h-screen">
       <ToastContainer position="top-right" autoClose={3000} />
