@@ -1,11 +1,79 @@
-import React from "react";
+"use client";
+import React, { useContext, useEffect, useState } from "react";
 import Title from "../../ui/Title";
 import Button from "../../ui/Button";
-
+import { AuthContext } from "@/context/AuthContextUser";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import useFetch from "@/hooks/useFetch";
+import { Response } from "@/types/adminTypes";
+import { toast, ToastContainer } from "react-toastify";
 function Consultation() {
+  const userContext = useContext(AuthContext);
+  const [userToken, setUserToken] = useState<string>("");
+  const [userData, setUserData] = useState<Record<string, any> | null>(null);
+
+  const [messageData, setMessgeData] = useState<Record<string, any>>({});
+  useEffect(() => {
+    setUserToken(userContext?.user?.token ?? "");
+    setUserData({
+      patient_id: userContext?.user?.uid,
+      patient: userContext?.user?.name,
+    });
+  }, [userContext]);
+
+  const { data } = useQuery({
+    queryKey: ["doctors"],
+    queryFn: async () => {
+      return await useFetch("/api/getDoctors", "GET", {}, userToken);
+    },
+    enabled: !!userToken,
+  });
+
+  const sendMessage = async (
+    userData: Record<string, any> | null,
+    messageData: Record<string, any>,
+    token: string
+  ): Promise<Response> => {
+    return await useFetch(
+      "/api/sendMessage",
+      "POST",
+      { ...userData, ...messageData },
+      token
+    );
+  };
+
+  const { mutate } = useMutation({
+    mutationFn: async () => {
+      if (!userData) return;
+      return await sendMessage(userData, messageData, userToken);
+    },
+    onSuccess: (data) => {
+      if (!data || Object.keys(data).length === 0) return;
+      if (data.status) {
+        toast.success("Message sent");
+        return;
+      }
+      if (typeof data?.msg === "string") toast.error(data?.msg);
+    },
+    onError: () => {
+      toast.error("Something went wrong!");
+    },
+  });
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { value, id } = e.target;
+
+    setMessgeData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
   return (
     <div className="max-container px-5">
-      <div className="flex justify-between max-xl:flex-col max-xl:gap-10">
+      <ToastContainer position="top-right" autoClose={3000} />
+      <div className="flex justify-between max-xl:flex-col max-xl:gap-10 gap-5">
         <div>
           <Title title="Telemedicine consultation" subtitle="" />
           <div className="mt-5 max-w-[550px] text-lg leading-[30px]">
@@ -17,32 +85,34 @@ function Consultation() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 flex-1">
           <div className="flex gap-2 max-md:flex-col">
-            <input className="flex-1" type="text" placeholder="Name" />
-            <input className="flex-1" type="text" placeholder="Email" />
-          </div>
-          <div className="flex gap-2 max-md:flex-col">
-            <input type="number" placeholder="Phone number" />
             <select
+              onChange={handleChange}
               className="w-full min-h-[50px] border border-gray-300 text-black/80"
               name=""
-              id=""
+              id="doctor_id"
             >
-              <option value="Doctor">Doctor 1</option>
-              <option value="Doctor">Doctor 2</option>
-              <option value="Doctor">Doctor 3</option>
+              <option value="">Select Doctor</option>
+              {typeof data?.msg === "string"
+                ? ""
+                : data?.msg.map((item: Record<string, any>, i: number) => (
+                    <option key={i} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
             </select>
           </div>
 
           <textarea
+            onChange={handleChange}
             className="min-h-[250px]"
             placeholder="Your Message"
             name=""
-            id=""
+            id="message"
           ></textarea>
 
-          <Button />
+          <Button onClick={mutate} />
         </div>
       </div>
     </div>
