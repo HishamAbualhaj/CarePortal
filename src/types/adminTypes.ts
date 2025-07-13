@@ -50,7 +50,6 @@ export type formMessage = {
   id: string;
   doctor_id: string;
   patient_id: string;
-  doctor: string;
   patient: string;
   message: string;
   reply: string;
@@ -69,10 +68,12 @@ export type formContact = {
 
 export type formNews = {
   id: string;
+  doctor_id: string;
   doctor: string;
   image_url: string;
   fileName: string;
   title: string;
+  subtitle: string;
   description: string;
   date: string;
 };
@@ -85,6 +86,7 @@ export type FormItem<T, K extends keyof T> = {
       e: React.ChangeEvent<
         HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
       >
-    ) => void
+    ) => void,
+    data?: Record<string, any>[]
   ) => ReactNode;
 };
