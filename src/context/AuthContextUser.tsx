@@ -50,7 +50,7 @@ function AuthContextUser({ children }: Props) {
   if (loading) {
     return (
       <>
-        <div className="h-screen bg-blue-200 flex items-center justify-center text-4xl ">
+        <div className="h-screen flex items-center justify-center text-4xl ">
           <div className="flex animate-pulse gap-1 font-bold md:text-4xl text-xl">
             <div className="text-blue-500">Care</div>
             <div className="text-black">Portal</div>
