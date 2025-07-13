@@ -1,10 +1,19 @@
+"use client";
 import Footer from "@/components/layouts/Landing/Footer";
 import Header from "@/components/layouts/Landing/Header";
 import Button from "@/components/ui/Button";
 import Title from "@/components/ui/Title";
-import React from "react";
-
+import { AuthContext } from "@/context/AuthContextUser";
+import useFetch from "@/hooks/useFetch";
+import { useMutation } from "@tanstack/react-query";
+import React, { useContext, useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import { Response } from "@/types/adminTypes";
 function page() {
+  const userContext = useContext(AuthContext);
+  const [userData, setUserData] = useState<Record<string, any> | null>(null);
+  const [contactData, setContactData] = useState<Record<string, any>>({});
+
   const contactInfo = [
     {
       icon: "📞",
@@ -27,8 +36,57 @@ function page() {
       lines: ["Mon-Sat 09:00-20:00", "Sunday Emergency only"],
     },
   ];
+
+  useEffect(() => {
+    setUserData({
+      patient_id: userContext?.user?.uid ?? "",
+      patient: userContext?.user?.name ?? "User",
+    });
+  }, [userContext]);
+
+  const sendMessage = async (
+    userData: Record<string, any> | null,
+    contactData: Record<string, any>
+  ): Promise<Response> => {
+    return await useFetch("/api/sendContact", "POST", {
+      ...userData,
+      ...contactData,
+    });
+  };
+
+  const { mutate } = useMutation({
+    mutationFn: async () => {
+      if (!userData) return;
+      return await sendMessage(userData, contactData);
+    },
+    onSuccess: (data) => {
+      if (!data || Object.keys(data).length === 0) return;
+      if (data.status) {
+        toast.success("Contact sent");
+        return;
+      }
+      if (typeof data?.msg === "string") toast.error(data?.msg);
+    },
+    onError: () => {
+      toast.error("Something went wrong!");
+    },
+  });
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLSelectElement | HTMLTextAreaElement | HTMLInputElement
+    >
+  ) => {
+    const { value, id } = e.target;
+
+    setContactData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
   return (
     <>
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className="shadow-main">
         <Header />
       </div>
@@ -37,16 +95,31 @@ function page() {
           <div className="bg-secondary rounded-lg p-5 flex-1">
             <Title title="get in touch" subtitle="Contact" />
             <div className="flex mt-5 flex-col gap-5">
-              <input type="text" placeholder="Name" />
-              <input type="text" placeholder="Email" />
-              <input type="text" placeholder="Subject" />
+              <input
+                id="name"
+                onChange={handleChange}
+                type="text"
+                placeholder="Name"
+              />
+              <input
+                id="email"
+                onChange={handleChange}
+                type="text"
+                placeholder="Email"
+              />
+              <input
+                id="subject"
+                onChange={handleChange}
+                type="text"
+                placeholder="Subject"
+              />
               <textarea
+                id="message"
+                onChange={handleChange}
                 className="min-h-[200px]"
                 placeholder="Your Message"
-                name=""
-                id=""
               ></textarea>
-              <Button />
+              <Button onClick={mutate} />
             </div>
           </div>
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
