@@ -4,21 +4,39 @@ import withAuth from "@/lib/withAuth";
 export async function GET(req: NextRequest) {
   try {
     return withAuth(req, async (user, req) => {
-        if (user.role !== "admin") {
-          return NextResponse.json(
-            {
-              status: false,
-              msg: "Authentication credentials are wrong",
-            },
-            { status: 401 }
-          );
-        }
-      const snapshot = await adminDB.collection("appointment").get();
-      const appointmentData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      return NextResponse.json({ status: true, msg: appointmentData });
+      let snapshot = null;
+      if (user.role === "user") {
+        snapshot = await adminDB
+          .collection("appointment")
+          .where("status", "==", "available")
+          .get();
+      } else {
+        snapshot = await adminDB.collection("appointment").get();
+      }
+
+      const appointmentData: Record<string, any>[] = snapshot.docs.map(
+        (doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })
+      );
+
+      const appointmentWithDoctor = await Promise.all(
+        appointmentData.map(async (appt) => {
+          const snapshot = await adminDB
+            .collection("doctors")
+            .doc(appt.doctor_id)
+            .get();
+
+          return {
+            ...appt,
+            doctor: snapshot?.data()?.name || "Unknown",
+          };
+        })
+      );
+
+      console.log(appointmentWithDoctor);
+      return NextResponse.json({ status: true, msg: appointmentWithDoctor });
     });
   } catch (error) {
     console.log(error);
