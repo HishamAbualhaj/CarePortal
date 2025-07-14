@@ -7,14 +7,22 @@ import Link from "next/link";
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/context/AuthContextUser";
 import Image from "next/image";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import useUpload from "@/hooks/useUpload";
 import { toast, ToastContainer } from "react-toastify";
-
+import useFetch from "@/hooks/useFetch";
+import ActionButtons from "@/components/layouts/dashboard/ActionButtons";
+import { formAppointment, formMessage } from "@/types/adminTypes";
+import { Response } from "@/types/adminTypes";
 function page() {
   const dataContext = useContext(AuthContext);
+  const user = useContext(AuthContext);
+  const [userToken, setUserToken] = useState<string>("");
+  useEffect(() => {
+    setUserToken(user?.user?.token ?? "");
+  }, [user]);
 
   const [userImage, setUserImage] = useState<File | undefined>(undefined);
   const [userData, setUserData] = useState<Record<string, any>>({
@@ -98,6 +106,95 @@ function page() {
     },
   ];
 
+  const { data: booked_appointments, refetch: refetchAppointment } = useQuery({
+    queryKey: ["booked_appointments"],
+    queryFn: async () => {
+      return await useFetch(
+        "/api/getBookedAppointment",
+        "POST",
+        {
+          id: user?.user?.uid,
+        },
+        userToken
+      );
+    },
+    enabled: !!userToken && !!user?.user?.uid,
+  });
+
+  const { data: mymessages, refetch: refetchMessage } = useQuery({
+    queryKey: ["mymessages"],
+    queryFn: async () => {
+      return await useFetch(
+        "/api/getMyMessages",
+        "POST",
+        {
+          id: user?.user?.uid,
+        },
+        userToken
+      );
+    },
+    enabled: !!userToken && !!user?.user?.uid,
+  });
+  const useDeleteMutation = (
+    apiFn: (data: Record<string, any>, token: string) => Promise<Response>,
+    text: string,
+    token: string
+  ) => {
+    return useMutation({
+      mutationFn: async (data: formAppointment | formMessage) => {
+        return await apiFn(data, token);
+      },
+      onSuccess: (data) => {
+        if (!data || Object.keys(data).length === 0) return;
+        if (data.status) {
+          toast.success(text);
+          return;
+        }
+        if (typeof data?.msg === "string") toast.error(data?.msg || "");
+      },
+      onError: () => {
+        toast.error("Something went wrong!");
+      },
+    });
+  };
+
+  const deleteAppointmentFn = async (
+    dataForDelete: Record<string, any>,
+    token: string
+  ): Promise<Response> => {
+    return await useFetch(
+      "/api/deleteUserAppointment",
+      "DELETE",
+      {
+        ...dataForDelete,
+      },
+      token
+    );
+  };
+
+  const deleteMessageFn = async (
+    dataForDelete: Record<string, any>,
+    token: string
+  ): Promise<Response> => {
+    return await useFetch(
+      "/api/deleteUserMessage",
+      "DELETE",
+      { ...dataForDelete },
+      token
+    );
+  };
+
+  const deleteAppointment = useDeleteMutation(
+    deleteAppointmentFn,
+    "Appointment Deleted successfully!",
+    userToken
+  );
+  const deleteMessage = useDeleteMutation(
+    deleteMessageFn,
+    "Message Deleted successfully!",
+    userToken
+  );
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     setUserImage(file);
@@ -165,7 +262,6 @@ function page() {
                         />
                       )
                     ) : (
-                      // <img src={} alt="" />
                       <FontAwesomeIcon
                         className="text-8xl bg-gray-200 text-gray-400 w-fit mx-auto rounded-3xl p-5"
                         icon={faUser}
@@ -262,19 +358,42 @@ function page() {
             <div className="mt-3 overflow-auto">
               <Table
                 columns={[
-                  { key: "name", label: "Doctor" },
-                  { key: "department", label: "Department" },
-                  { key: "created_date", label: "Date" },
+                  { key: "doctor", label: "Doctor" },
+                  { key: "date", label: "Date" },
                   { key: "time", label: "Time" },
                   { key: "message", label: "Message" },
                   { key: "action", label: "Delete" },
                 ]}
-                customAction={() => (
-                  <div className="hover:bg-red-400 transition cursor-pointer bg-red-500 w-fit text-white p-2 rounded-md">
-                    Delete
-                  </div>
+                tablePopup={(item) => [
+                  {
+                    popupTitle: "Delete Appointment",
+                    PopupContent: (
+                      <div className="text-xl py-5">
+                        Are you sure you want to delete this appointment?
+                      </div>
+                    ),
+                    popupActionText: "Delete",
+                    popupAction: async () => {
+                      await deleteAppointment.mutateAsync(
+                        item as formAppointment
+                      );
+                      refetchAppointment();
+                    },
+                  },
+                ]}
+                customAction={(item, setPopUp, tablePopup) => (
+                  <ActionButtons
+                    item={item}
+                    tablePopup={tablePopup}
+                    setPopUp={setPopUp}
+                    btns={["delete"]}
+                  />
                 )}
-                data={[]}
+                data={
+                  typeof booked_appointments?.msg === "string"
+                    ? []
+                    : booked_appointments?.msg ?? []
+                }
               />
             </div>
           </div>
@@ -285,19 +404,40 @@ function page() {
             <div className="mt-3 overflow-auto">
               <Table
                 columns={[
-                  { key: "name", label: "Doctor" },
-                  { key: "department", label: "Date Sent" },
-                  { key: "created_date", label: "Time Sent" },
-                  { key: "time", label: "Message" },
-                  { key: "message", label: "Dr.message" },
+                  { key: "doctor", label: "Doctor" },
+                  { key: "message", label: "Message" },
+                  { key: "reply", label: "Dr.message" },
+                  { key: "sent_at", label: "Sent at" },
                   { key: "action", label: "Delete" },
                 ]}
-                customAction={() => (
-                  <div className="hover:bg-red-400 transition cursor-pointer bg-red-500 w-fit text-white p-2 rounded-md">
-                    Delete
-                  </div>
+                tablePopup={(item) => [
+                  {
+                    popupTitle: "Delete Appointment",
+                    PopupContent: (
+                      <div className="text-xl py-5">
+                        Are you sure you want to delete this message?
+                      </div>
+                    ),
+                    popupActionText: "Delete",
+                    popupAction: async () => {
+                      await deleteMessage.mutateAsync(item as formMessage);
+                      refetchMessage();
+                    },
+                  },
+                ]}
+                customAction={(item, setPopUp, tablePopup) => (
+                  <ActionButtons
+                    item={item}
+                    tablePopup={tablePopup}
+                    setPopUp={setPopUp}
+                    btns={["delete"]}
+                  />
                 )}
-                data={[]}
+                data={
+                  typeof mymessages?.msg === "string"
+                    ? []
+                    : mymessages?.msg ?? []
+                }
               />
             </div>
           </div>
