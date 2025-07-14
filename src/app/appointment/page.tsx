@@ -72,7 +72,7 @@ function page() {
   const { data, refetch } = useQuery({
     queryKey: ["appointments"],
     queryFn: async () => {
-      return await useFetch("/api/getAvailableAppointment", "GET", {}, userToken);
+      return await useFetch("/api/getAppointment", "GET", {}, userToken);
     },
     enabled: !!userToken,
   });

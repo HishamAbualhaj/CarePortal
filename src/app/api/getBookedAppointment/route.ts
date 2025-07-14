@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
       const body = await req.json();
       const snapshot = await adminDB
         .collection("appointment")
-        .where("status", "==", "available")
+        .where("status", "==", "booked")
         .where("patient_id", "==", `${body.id}`)
         .get();
       const appointmentData = snapshot.docs.map((doc) => ({
