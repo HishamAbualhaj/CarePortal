@@ -207,6 +207,49 @@ const AddDoctor = ({
     setData(formData);
   }, [formData]);
 
+  const specializations = [
+    "Cardiology",
+    "Neurology",
+    "Dermatology",
+    "Pediatrics",
+    "Psychiatry",
+    "Orthopedics",
+    "Gastroenterology",
+    "Oncology",
+    "Endocrinology",
+    "Pulmonology",
+    "Urology",
+    "Nephrology",
+    "Ophthalmology",
+    "Obstetrics and Gynecology",
+    "Rheumatology",
+  ];
+
+  const countries = [
+    "Algeria",
+    "Bahrain",
+    "Comoros",
+    "Djibouti",
+    "Egypt",
+    "Iraq",
+    "Jordan",
+    "Kuwait",
+    "Lebanon",
+    "Libya",
+    "Mauritania",
+    "Morocco",
+    "Oman",
+    "Palestine",
+    "Qatar",
+    "Saudi Arabia",
+    "Somalia",
+    "Sudan",
+    "Syria",
+    "Tunisia",
+    "United Arab Emirates",
+    "Yemen",
+    "Western Sahara",
+  ];
   const items: FormItem<formDoctor, keyof formDoctor>[] = [
     {
       key: "image_url",
@@ -309,14 +352,19 @@ const AddDoctor = ({
       key: "specialization",
       text: "specialization",
       item: (inputData: string, handleChange) => (
-        <input
+        <select
           id="specialization"
           className="bg-gray-100 border-none"
-          type="text"
-          placeholder="specialization"
           value={inputData}
           onChange={handleChange}
-        />
+        >
+          <option value="">Select specialization</option>
+          {specializations.map((item, i) => (
+            <option key={i} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
       ),
     },
     {
@@ -352,14 +400,19 @@ const AddDoctor = ({
       key: "city",
       text: "City",
       item: (inputData: string, handleChange) => (
-        <input
+        <select
           id="city"
           className="bg-gray-100 border-none"
-          type="text"
-          placeholder="City"
           value={inputData}
           onChange={handleChange}
-        />
+        >
+          <option value="">Select city</option>
+          {countries.map((item, i) => (
+            <option key={i} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
       ),
     },
     {
