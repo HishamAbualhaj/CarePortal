@@ -22,22 +22,20 @@ function AdminPanel({
   filterContent,
   isPending,
   filterAction,
+  setFilterData,
 }: adminPanelProps) {
   const [filter, setFilter] = useState<boolean>(false);
-  const [idChange, setIdChange] = useState<boolean>(false);
 
   const [isPop, setPopUp] = useState<PopupProps | null>(null);
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { id, value } = e.target;
-    if (value === "") {
-      setIdChange(false);
-      return;
-    }
-    if (id === "id") {
-      setIdChange(true);
-    }
+
+    setFilterData?.((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
   };
   return (
     <div className="flex flex-col gap-10">
@@ -80,8 +78,13 @@ function AdminPanel({
             </div>
             {filter && (
               <div className="flex max-md:flex-col gap-4 pb-5">
-                {filterContent && filterContent(handleChange, idChange)}
-                <Button text="Filter" />
+                {filterContent && filterContent(handleChange)}
+                <Button
+                  onClick={() => {
+                    filterAction?.();
+                  }}
+                  text="Filter"
+                />
               </div>
             )}
 

@@ -7,11 +7,11 @@ export interface adminPanelProps extends tableProps {
   filterContent?: (
     handleChange: (
       e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-    ) => void,
-    isChange: boolean
+    ) => void
   ) => ReactNode;
   filterAction?: () => void;
   mainPopup?: PopupProps;
+  setFilterData?: Dispatch<SetStateAction<Record<string, any>>>;
 }
 
 export interface PopupProps {
