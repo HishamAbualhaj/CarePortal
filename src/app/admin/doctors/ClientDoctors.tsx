@@ -112,10 +112,25 @@ function ClientDoctors() {
     "Doctor added successfully!",
     userToken
   );
-  const { data, refetch } = useQuery({
+
+  const [filterData, setFilterData] = useState<Record<string, any>>({
+    name: "",
+    gender: "",
+  });
+
+  const {
+    data,
+    refetch,
+    isFetching: isFetchingData,
+  } = useQuery({
     queryKey: ["doctors"],
     queryFn: async () => {
-      return await useFetch("/api/getDoctors", "GET", {}, userToken);
+      return await useFetch(
+        "/api/getDoctors",
+        "POST",
+        { ...filterData },
+        userToken
+      );
     },
     enabled: !!userToken,
   });
@@ -127,6 +142,11 @@ function ClientDoctors() {
       <div className="flex-1 w-full bg-secondary">
         <div className="bg-white py-[34px] shadow-main"></div>
         <div className="mt-5">
+          {isFetchingData && (
+            <div className="py-2 xl:px-10 px-5 text-xl animate-pulse">
+              Loading data ...
+            </div>
+          )}
           <AdminPanel
             columns={[
               { key: "id", label: "ID" },
@@ -159,23 +179,22 @@ function ClientDoctors() {
               },
             }}
             data={typeof data?.msg === "string" ? [] : data?.msg ?? []}
-            filterContent={(handleChange, idChange) => (
+            filterContent={(handleChange) => (
               <>
                 <input
-                  id="id"
-                  onChange={handleChange}
-                  placeholder="ID"
-                  type="text"
-                />
-                <input
-                  disabled={idChange}
-                  className={`${idChange ? "opacity-50" : ""}`}
+                  id="name"
                   onChange={handleChange}
                   placeholder="Doctor Name"
                   type="text"
                 />
+                <select onChange={handleChange} id="gender">
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
               </>
             )}
+            filterAction={refetch}
+            setFilterData={setFilterData}
           />
         </div>
       </div>

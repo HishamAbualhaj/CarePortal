@@ -177,13 +177,28 @@ function ClientUsers() {
     userToken
   );
 
-  const { data, refetch } = useQuery({
+  const [filterData, setFilterData] = useState<Record<string, any>>({
+    name: "",
+    gender: "",
+  });
+
+  const {
+    data,
+    refetch,
+    isFetching: isFetchingData,
+  } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
-      return await useFetch("/api/getUsers", "GET", {}, userToken);
+      return await useFetch(
+        "/api/getUsers",
+        "POST",
+        { ...filterData },
+        userToken
+      );
     },
     enabled: !!userToken,
   });
+
   useEffect(() => {
     setIsLoading(edit.isPending);
   }, [edit.isPending]);
@@ -197,6 +212,11 @@ function ClientUsers() {
       <div className="flex-1 w-full bg-secondary relative">
         <div className="bg-white py-[34px] shadow-main"></div>
         <div className="mt-5">
+          {isFetchingData && (
+            <div className="py-2 xl:px-10 px-5 text-xl animate-pulse">
+              Loading data ...
+            </div>
+          )}
           <AdminPanel
             columns={[
               { key: "id", label: "ID" },
@@ -266,33 +286,22 @@ function ClientUsers() {
             }}
             data={typeof data?.msg === "string" ? [] : data?.msg ?? []}
             panelTitle="Users"
-            filterContent={(handleChange, idChange) => (
+            filterContent={(handleChange) => (
               <>
                 <input
-                  id="id"
-                  onChange={handleChange}
-                  placeholder="ID"
-                  type="text"
-                />
-                <input
-                  disabled={idChange}
-                  className={`${idChange ? "opacity-50" : ""}`}
+                  id="name"
                   onChange={handleChange}
                   placeholder="Username"
                   type="text"
                 />
-                <select
-                  className={`${idChange ? "opacity-50" : ""}`}
-                  disabled={idChange}
-                  onChange={handleChange}
-                  name=""
-                  id=""
-                >
+                <select onChange={handleChange} id="gender">
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                 </select>
               </>
             )}
+            filterAction={refetch}
+            setFilterData={setFilterData}
             isPending={isLoading}
           />
         </div>
