@@ -1,7 +1,7 @@
 import Link from "next/link";
 import React from "react";
-import ImageFallBack from "@/components/ui/ImageFallBack";
-
+import Image from "next/image";
+import HeroImage from '../../../../public/hero_image.png'
 function Hero() {
   const buttons = [
     {
@@ -49,7 +49,8 @@ function Hero() {
                 Appointment
               </Link>
             </div>
-            <ImageFallBack w="500px" />
+            <Image width={500} height={500} src={HeroImage} className="max-xl:w-full h-auto" alt="Hero page"/>
+     
           </div>
         </div>
         <div className="flex lg:translate-y-1/2 lg:gap-10 gap-5 lg:flex-row flex-col px-5 justify-center">

@@ -1,40 +1,15 @@
 import React from "react";
 import Title from "../../ui/Title";
 import Link from "next/link";
-import ImageFallBack from "@/components/ui/ImageFallBack";
+import Offer_Image from "../../../../public/offer_image.png";
+import Image from "next/image";
 
 function OurOffer() {
-  const services = [
-    { key: 1, text: "Surgery", icon: null, link: "/" },
-    { key: 2, text: "Internal medicine", icon: null, link: "/" },
-    { key: 3, text: "Bones", icon: null, link: "/" },
-    { key: 4, text: "Blood Bank", icon: null, link: "/" },
-  ];
   return (
     <>
       <div className="max-w-[992px] mx-auto px-5 py-[80px] text-center">
         <Title title="Care you can believe in" subtitle="Our Offer" />
         <div className="mt-10 flex gap-5 max-xl:flex-col xl:items-start items-center justify-between">
-          <div className="border border-blue-900 rounded-md flex flex-col justify-between">
-            <div className="flex flex-1 flex-col p-1 justify-between">
-              {services.map((service) => (
-                <div
-                  key={service.key}
-                  className="flex flex-col gap-2border-b border-gray-300 hover:bg-gray-100"
-                >
-                  <Link className=" py-10 px-4" href={service.link}>
-                    {service.icon}
-                    {service.text}
-                  </Link>
-                </div>
-              ))}
-            </div>
-            <div className="bg-blue-900 text-white flex">
-              <Link className="py-2 flex-1" href="/">
-                View All
-              </Link>
-            </div>
-          </div>
           {/* service component  */}
           <div className="mt-5">
             <div className="font-bold text-2xl text-start">
@@ -64,26 +39,26 @@ function OurOffer() {
                 ))}
               </div>
             </div>
-
             <div className="max-w-[600px] text-lg mt-5 text-start">
-              We offer a full spectrum of medical services, including preventive
-              care, primary care, specialty care, and diagnostic services, Our
-              preventive care services focus on promoting good health and
-              wellness through regular check-ups, screenings, and immunizations.
-            </div>
-
-            <div className="max-w-[600px] text-lg mt-5 text-start">
-              We offer a full spectrum of medical services, including preventive
-              care, primary care, specialty care, and diagnostic services, Our
-              preventive care services focus on promoting good health and
-              wellness through regular check-ups, screenings, and immunizations.
+              We provide comprehensive healthcare solutions designed to meet
+              every stage of life. Our services include expert primary care,
+              advanced specialty treatments, diagnostic testing, and ongoing
+              health monitoring. With a focus on patient-centered care, we are
+              committed to delivering personalized treatment plans, preventive
+              screenings, and timely interventions to support long-term
+              well-being and peace of mind.
             </div>
           </div>
           {/* service component  */}
 
           <div className="flex flex-col gap-2">
-            <ImageFallBack w="300px" />
-            <ImageFallBack w="300px" />
+            <Image
+              alt=""
+              height={500}
+              width={500}
+              className="w-full h-auto"
+              src={Offer_Image}
+            />
           </div>
         </div>
       </div>
