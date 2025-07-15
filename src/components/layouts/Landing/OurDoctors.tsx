@@ -7,11 +7,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ImageFallBack from "../../ui/ImageFallBack";
 
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Keyboard } from "swiper/modules";
+import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { useQuery } from "@tanstack/react-query";
+import useFetch from "@/hooks/useFetch";
 function OurDoctors() {
   const doctorInfo = [
     {
@@ -110,6 +112,14 @@ function OurDoctors() {
       ],
     },
   ];
+
+  const { data } = useQuery({
+    queryKey: ["ourdoctor"],
+    queryFn: async () => {
+      return await useFetch("/api/getSearchDoctor", "POST", { limit: 4 });
+    },
+  });
+
   return (
     <div className="max-container text-center relative xl:px-5 px-12">
       <div className="absolute"></div>
@@ -125,7 +135,7 @@ function OurDoctors() {
         slidesPerView={3}
         keyboard={{
           enabled: true,
-          onlyInViewport: true, 
+          onlyInViewport: true,
         }}
         breakpoints={{
           0: {
@@ -139,24 +149,59 @@ function OurDoctors() {
           },
         }}
       >
-        {doctorInfo.map((info) => (
-          <SwiperSlide>
-            <div
-              key={info.key}
-              className="flex flex-col border border-gray-200 rounded-md p-3 hover:opacity-85 transition mt-10"
-            >
-              <ImageFallBack />
-              <div className="flex flex-col gap-2 bg-secondary py-10">
-                <div className="text-blue-500 font-bold">{info.name}</div>
-                <div className="text-blue-400">{info.title}</div>
-              </div>
+        {typeof data?.msg === "string" || data?.msg.length === 0
+          ? doctorInfo.map((info, i) => (
+              <div key={info.key}>
+                <SwiperSlide key={info.key}>
+                  <div className="flex flex-col border border-gray-200 rounded-md p-3 hover:opacity-85 transition mt-10">
+                    <ImageFallBack />
+                    <div className="flex flex-col gap-2 bg-secondary py-10">
+                      <div className="text-blue-500 font-bold">{info.name}</div>
+                      <div className="text-blue-400">{info.title}</div>
+                    </div>
 
-              <Link className="py-4 bg-blue-500 text-white" href={info.link}>
-                View Profile
-              </Link>
-            </div>
-          </SwiperSlide>
-        ))}
+                    <Link
+                      className="py-4 bg-blue-500 text-white"
+                      href={info.link}
+                    >
+                      View Profile
+                    </Link>
+                  </div>
+                </SwiperSlide>
+              </div>
+            ))
+          : data?.msg.map((info: Record<string, any>, i: number) => (
+              <div key={i}>
+                <SwiperSlide key={i}>
+                  <div className="flex flex-col border border-gray-200 rounded-md p-3 hover:opacity-85 transition mt-10">
+                    {info.image_url ? (
+                      <Image
+                        alt="doctor image"
+                        width={500}
+                        height={500}
+                        className="w-full h-auto"
+                        src={info.image_url}
+                      />
+                    ) : (
+                      <ImageFallBack />
+                    )}
+
+                    <div className="flex flex-col gap-2 bg-secondary py-10">
+                      <div className="text-blue-500 font-bold">{info.name}</div>
+                      <div className="text-blue-400">{info.specialization}</div>
+                    </div>
+
+                    <Link
+                      className="py-4 bg-blue-500 text-white"
+                      href={`/doctors/${info.id}`}
+                    >
+                      View Profile
+                    </Link>
+                  </div>
+                </SwiperSlide>
+              </div>
+            ))}
+
         <div className="custom-next xl:-right-[100px] right-1">
           <FontAwesomeIcon icon={faArrowRight} />
         </div>

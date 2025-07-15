@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
       snapshot = await adminDB
         .collection("news")
         .orderBy("created_at", "desc")
-        .limit(5)
+        .limit(4)
         .get();
     }
 

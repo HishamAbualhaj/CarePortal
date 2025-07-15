@@ -18,7 +18,12 @@ export async function POST(req: NextRequest) {
       queryRef = queryRef.where("gender", "==", body?.gender);
     }
 
-    const snapshot = await queryRef.get();
+    let snapshot = null;
+    if (body?.limit) {
+      snapshot = await queryRef.limit(body?.limit).get();
+    } else {
+      snapshot = await queryRef.get();
+    }
 
     let doctorsData: Record<string, any>[] = snapshot.docs.map((doc) => ({
       id: doc.id,
