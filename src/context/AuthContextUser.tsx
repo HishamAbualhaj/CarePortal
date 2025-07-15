@@ -4,6 +4,7 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { createContext } from "react";
 import { auth, db } from "@/firebase/config";
 import { doc, getDoc } from "firebase/firestore";
+import useFetch from "@/hooks/useFetch";
 interface Props {
   children: React.ReactNode;
 }
@@ -37,6 +38,7 @@ function AuthContextUser({ children }: Props) {
         const snap = await getDoc(userRef);
         if (snap.exists()) {
           const newUser = { uid: user?.uid, ...snap.data(), token };
+          await useFetch("/api/setToken", "POST", { token });
           setUser(newUser as UserProfile);
           setLoading(false);
           return;
