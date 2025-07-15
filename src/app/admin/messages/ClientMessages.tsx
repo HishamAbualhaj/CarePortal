@@ -96,10 +96,20 @@ function ClientMessages() {
     userToken,
     "delete"
   );
-  const { data } = useQuery({
+
+  const [filterData, setFilterData] = useState<Record<string, any>>({
+    patient: "",
+  });
+
+  const { data, refetch, isFetching } = useQuery({
     queryKey: ["messages"],
     queryFn: async () => {
-      return await useFetch("/api/getMessages", "GET", {}, userToken);
+      return await useFetch(
+        "/api/getMessages",
+        "POST",
+        { ...filterData },
+        userToken
+      );
     },
     enabled: !!userToken,
   });
@@ -117,6 +127,11 @@ function ClientMessages() {
       <div className="flex-1 w-full bg-secondary">
         <div className="bg-white py-[34px] shadow-main"></div>
         <div className="mt-5">
+          {isFetching && (
+            <div className="py-2 xl:px-10 px-5 text-xl animate-pulse">
+              Loading data ...
+            </div>
+          )}
           <AdminPanel
             columns={[
               { key: "id", label: "ID" },
@@ -163,30 +178,18 @@ function ClientMessages() {
                 },
               },
             ]}
-            filterContent={(handleChange, idChange) => (
+            filterContent={(handleChange) => (
               <>
                 <input
-                  id="id"
-                  onChange={handleChange}
-                  placeholder="ID"
-                  type="text"
-                />
-                <input
-                  disabled={idChange}
-                  className={`${idChange ? "opacity-50" : ""}`}
+                  id="patient"
                   onChange={handleChange}
                   placeholder="Patient Name"
                   type="text"
                 />
-                <input
-                  disabled={idChange}
-                  className={`${idChange ? "opacity-50" : ""}`}
-                  onChange={handleChange}
-                  placeholder="Doctor Name"
-                  type="text"
-                />
               </>
             )}
+            setFilterData={setFilterData}
+            filterAction={refetch}
             isPending={isLoading}
           />
         </div>

@@ -147,11 +147,19 @@ function ClientAppointments() {
       token
     );
   };
-
-  const { data, refetch } = useQuery({
+  const [filterData, setFilterData] = useState<Record<string, any>>({
+    status: "",
+    date: "",
+  });
+  const { data, refetch, isFetching } = useQuery({
     queryKey: ["appointments"],
     queryFn: async () => {
-      return await useFetch("/api/getAppointment", "GET", {}, userToken);
+      return await useFetch(
+        "/api/getAppointment",
+        "POST",
+        { ...filterData },
+        userToken
+      );
     },
     enabled: !!userToken,
   });
@@ -159,7 +167,7 @@ function ClientAppointments() {
   const doctors = useQuery({
     queryKey: ["doctors"],
     queryFn: async () => {
-      return await useFetch("/api/getDoctors", "GET", {}, userToken);
+      return await useFetch("/api/getDoctors", "POST", {}, userToken);
     },
     enabled: !!userToken,
   });
@@ -178,107 +186,102 @@ function ClientAppointments() {
       <div className="flex-1 w-full bg-secondary">
         <div className="bg-white py-[34px] shadow-main"></div>
         <div className="mt-5">
-          <AdminPanel
-            columns={[
-              { key: "id", label: "ID" },
-              { key: "doctor", label: "Doctor" },
-              { key: "patient", label: "Patient" },
-              { key: "date", label: "Date" },
-              { key: "time", label: "Time" },
-              { key: "status", label: "Status" },
-              { key: "message", label: "Message" },
-              { key: "action", label: "Actions" },
-            ]}
-            customAction={(item, setPopUp, tablePopup) => (
-              <ActionButtons
-                item={item}
-                tablePopup={tablePopup}
-                setPopUp={setPopUp}
-                btns={["edit", "delete"]}
-              />
-            )}
-            tablePopup={(item) => [
-              {
-                popupTitle: "Delete Appointment",
-                PopupContent: (
-                  <div className="text-xl py-5">
-                    Are you sure you want to delete this appointment?
-                  </div>
-                ),
-                popupActionText: "Delete",
-                popupAction: async () => {
-                  await deleteMutation.mutateAsync(item as formAppointment);
-                  refetch();
+          {(isFetching || doctors.isFetching) && (
+            <div className="py-2 xl:px-10 px-5 text-xl animate-pulse">
+              Loading data ...
+            </div>
+          )}
+          {doctors.isSuccess && Array.isArray(doctors.data?.msg) && (
+            <AdminPanel
+              columns={[
+                { key: "id", label: "ID" },
+                { key: "doctor", label: "Doctor" },
+                { key: "patient", label: "Patient" },
+                { key: "date", label: "Date" },
+                { key: "time", label: "Time" },
+                { key: "status", label: "Status" },
+                { key: "message", label: "Message" },
+                { key: "action", label: "Actions" },
+              ]}
+              customAction={(item, setPopUp, tablePopup) => (
+                <ActionButtons
+                  item={item}
+                  tablePopup={tablePopup}
+                  setPopUp={setPopUp}
+                  btns={["edit", "delete"]}
+                />
+              )}
+              tablePopup={(item) => [
+                {
+                  popupTitle: "Delete Appointment",
+                  PopupContent: (
+                    <div className="text-xl py-5">
+                      Are you sure you want to delete this appointment?
+                    </div>
+                  ),
+                  popupActionText: "Delete",
+                  popupAction: async () => {
+                    await deleteMutation.mutateAsync(item as formAppointment);
+                    refetch();
+                  },
                 },
-              },
-              {
-                popupTitle: "Edit Appointment",
+                {
+                  popupTitle: "Edit Appointment",
+                  PopupContent: (
+                    <EditItems
+                      doctorData={
+                        typeof doctors.data?.msg === "string"
+                          ? []
+                          : (doctors.data?.msg as Record<string, any>[]) ?? []
+                      }
+                      data={item as formAppointment}
+                      setData={setEditAppointment}
+                    />
+                  ),
+                  popupActionText: "Edit",
+                  popupAction: async () => {
+                    await edit.mutateAsync();
+                    refetch();
+                  },
+                },
+              ]}
+              panelTitle="All Appointments"
+              btnText="Add Appointment"
+              mainPopup={{
+                popupTitle: "Add Appointment",
                 PopupContent: (
-                  <EditItems
+                  <AddItems
                     doctorData={
                       typeof doctors.data?.msg === "string"
                         ? []
                         : (doctors.data?.msg as Record<string, any>[]) ?? []
                     }
-                    data={item as formAppointment}
-                    setData={setEditAppointment}
+                    data={addAppointment}
+                    setData={setAddAppointment}
                   />
                 ),
-                popupActionText: "Edit",
+                popupActionText: `${add.isPending ? "Loading ..." : "Add"}`,
                 popupAction: async () => {
-                  await edit.mutateAsync();
+                  await add.mutateAsync();
                   refetch();
                 },
-              },
-            ]}
-            panelTitle="All Appointments"
-            btnText="Add Appointment"
-            mainPopup={{
-              popupTitle: "Add Appointment",
-              PopupContent: (
-                <AddItems
-                  doctorData={
-                    typeof doctors.data?.msg === "string"
-                      ? []
-                      : (doctors.data?.msg as Record<string, any>[]) ?? []
-                  }
-                  data={addAppointment}
-                  setData={setAddAppointment}
-                />
-              ),
-              popupActionText: `${add.isPending ? "Loading ..." : "Add"}`,
-              popupAction: async () => {
-                await add.mutateAsync();
-                refetch();
-              },
-            }}
-            data={typeof data?.msg === "string" ? [] : data?.msg ?? []}
-            filterContent={(handleChange, idChange) => (
-              <>
-                <input
-                  id="id"
-                  onChange={handleChange}
-                  placeholder="ID"
-                  type="text"
-                />
-                <input
-                  disabled={idChange}
-                  className={`${idChange ? "opacity-50" : ""}`}
-                  onChange={handleChange}
-                  placeholder="Doctor Name"
-                  type="text"
-                />
-                <input
-                  disabled={idChange}
-                  className={`${idChange ? "opacity-50" : ""}`}
-                  onChange={handleChange}
-                  placeholder="Patient Name"
-                  type="text"
-                />
-              </>
-            )}
-            isPending={isLoading}
-          />
+              }}
+              data={typeof data?.msg === "string" ? [] : data?.msg ?? []}
+              filterContent={(handleChange) => (
+                <>
+                  <select onChange={handleChange} id="status">
+                    <option value="">Select value</option>
+                    <option value="booked">booked</option>
+                    <option value="available">available</option>
+                  </select>
+                  <input id="date" onChange={handleChange} type="date" />
+                </>
+              )}
+              setFilterData={setFilterData}
+              filterAction={refetch}
+              isPending={isLoading}
+            />
+          )}
         </div>
       </div>
     </div>

@@ -1,10 +1,12 @@
 import { adminDB } from "@/firebase/adminConfig";
 import { NextResponse, NextRequest } from "next/server";
 import withAuth from "@/lib/withAuth";
-export async function GET(req: NextRequest) {
+import { type Query, type DocumentData } from "firebase-admin/firestore";
+export async function POST(req: NextRequest) {
   try {
     return withAuth(req, async (user, req) => {
-      if (user.role !== "admin") {
+      const body = await req.json();
+      if (user.role !== "admin" && user.role !== "doctor") {
         return NextResponse.json(
           {
             status: false,
@@ -13,8 +15,14 @@ export async function GET(req: NextRequest) {
           { status: 401 }
         );
       }
-      const snapshot = await adminDB.collection("messages").get();
-      const messageData: Record<string, any>[]  = snapshot.docs.map((doc) => ({
+      let queryRef: Query<DocumentData> = adminDB.collection("messages");
+      if (body?.patient) {
+        queryRef = queryRef.where("patient", "==", body.patient);
+      }
+
+      const snapshot = await queryRef.get();
+
+      const messageData: Record<string, any>[] = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));

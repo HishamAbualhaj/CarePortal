@@ -1,9 +1,14 @@
 import { adminDB } from "@/firebase/adminConfig";
 import { NextResponse, NextRequest } from "next/server";
 import withAuth from "@/lib/withAuth";
-export async function GET(req: NextRequest) {
+import {
+  type Query,
+  type DocumentData,
+} from "firebase-admin/firestore";
+export async function POST(req: NextRequest) {
   try {
     return withAuth(req, async (user, req) => {
+      const body = await req.json();
       let snapshot = null;
       if (user.role === "user") {
         snapshot = await adminDB
@@ -11,7 +16,16 @@ export async function GET(req: NextRequest) {
           .where("status", "==", "available")
           .get();
       } else {
-        snapshot = await adminDB.collection("appointment").get();
+        let queryRef: Query<DocumentData> = adminDB.collection("appointment");
+
+        if (body?.status) {
+          queryRef = queryRef.where("status", "==", body.status);
+        }
+        if (body?.date) {
+          queryRef = queryRef.where("date", "==", body.date);
+        }
+
+        snapshot = await queryRef.get();
       }
 
       const appointmentData: Record<string, any>[] = snapshot.docs.map(
