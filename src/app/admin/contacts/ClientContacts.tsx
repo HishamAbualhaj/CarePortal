@@ -8,6 +8,7 @@ import { formContact, Response } from "@/types/adminTypes";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import useFetch from "@/hooks/useFetch";
 import { toast, ToastContainer } from "react-toastify";
+import Link from "next/link";
 function ClientContacts() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -62,10 +63,20 @@ function ClientContacts() {
     userToken,
     "delete"
   );
-  const { data, refetch } = useQuery({
+
+  const [filterData, setFilterData] = useState<Record<string, any>>({
+    patient: "",
+    date: "",
+  });
+  const { data, refetch, isFetching } = useQuery({
     queryKey: ["contacts"],
     queryFn: async () => {
-      return await useFetch("/api/getContact", "GET", {}, userToken);
+      return await useFetch(
+        "/api/getContact",
+        "POST",
+        { ...filterData },
+        userToken
+      );
     },
     enabled: !!userToken,
   });
@@ -79,8 +90,15 @@ function ClientContacts() {
       <ToastContainer position="top-right" autoClose={3000} />
       <SideBar />
       <div className="flex-1 w-full bg-secondary">
-        <div className="bg-white py-[34px] shadow-main"></div>
+        <div className="bg-white py-3 flex justify-end px-5 shadow-main">
+          <Link className="border p-2 px-5 rounded-md bg-blue-600 text-white transition hover:bg-blue-400" href="/logout">Logout</Link>
+        </div>
         <div className="mt-5">
+          {isFetching && (
+            <div className="py-2 xl:px-10 px-5 text-xl animate-pulse">
+              Loading data ...
+            </div>
+          )}
           <AdminPanel
             columns={[
               { key: "id", label: "ID" },
@@ -110,29 +128,24 @@ function ClientContacts() {
                 ),
                 popupActionText: "Delete",
                 popupAction: async () => {
-                  console.log(item);
                   await deleteMutation.mutateAsync(item as formContact);
                   refetch();
                 },
               },
             ]}
-            filterContent={(handleChange, idChange) => (
+            filterContent={(handleChange) => (
               <>
                 <input
-                  id="id"
-                  onChange={handleChange}
-                  placeholder="ID"
-                  type="text"
-                />
-                <input
-                  disabled={idChange}
-                  className={`${idChange ? "opacity-50" : ""}`}
+                  id="patient"
                   onChange={handleChange}
                   placeholder="Username"
                   type="text"
                 />
+                <input id="date" onChange={handleChange} type="date" />
               </>
             )}
+            filterAction={refetch}
+            setFilterData={setFilterData}
             isPending={isLoading}
           />
         </div>

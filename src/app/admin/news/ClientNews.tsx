@@ -20,6 +20,7 @@ import { Response } from "@/types/adminTypes";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import useUpload from "@/hooks/useUpload";
 import useFetch from "@/hooks/useFetch";
+import Link from "next/link";
 function ClientNews() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const user = useContext(AuthContext);
@@ -156,11 +157,19 @@ function ClientNews() {
       toast.error("Something went wrong!");
     },
   });
-
-  const { data, refetch } = useQuery({
+  const [filterData, setFilterData] = useState<Record<string, any>>({
+    title: "",
+    date: "",
+  });
+  const { data, refetch, isFetching } = useQuery({
     queryKey: ["news"],
     queryFn: async () => {
-      return await useFetch("/api/getNews", "GET", {}, userToken);
+      return await useFetch(
+        "/api/getNews",
+        "POST",
+        { ...filterData },
+        userToken
+      );
     },
     enabled: !!userToken,
   });
@@ -176,8 +185,20 @@ function ClientNews() {
       <ToastContainer position="top-right" autoClose={3000} />
       <SideBar />
       <div className="flex-1 w-full bg-secondary">
-        <div className="bg-white py-[34px] shadow-main"></div>
+        <div className="bg-white py-3 flex justify-end px-5 shadow-main">
+          <Link
+            className="border p-2 px-5 rounded-md bg-blue-600 text-white transition hover:bg-blue-400"
+            href="/logout"
+          >
+            Logout
+          </Link>
+        </div>
         <div className="mt-5">
+          {isFetching && (
+            <div className="py-2 xl:px-10 px-5 text-xl animate-pulse">
+              Loading data ...
+            </div>
+          )}
           <AdminPanel
             columns={[
               { key: "id", label: "ID" },
@@ -244,30 +265,19 @@ function ClientNews() {
                 refetch();
               },
             }}
-            filterContent={(handleChange, idChange) => (
+            filterContent={(handleChange) => (
               <>
                 <input
-                  id="id"
-                  onChange={handleChange}
-                  placeholder="ID"
-                  type="text"
-                />
-                <input
-                  disabled={idChange}
-                  className={`${idChange ? "opacity-50" : ""}`}
+                  id="title"
                   onChange={handleChange}
                   placeholder="title"
                   type="text"
                 />
-                <input
-                  disabled={idChange}
-                  className={`${idChange ? "opacity-50" : ""}`}
-                  onChange={handleChange}
-                  placeholder="Doctor Name"
-                  type="text"
-                />
+                <input id="date" onChange={handleChange} type="date" />
               </>
             )}
+            filterAction={refetch}
+            setFilterData={setFilterData}
             isPending={isLoading}
           />
         </div>
