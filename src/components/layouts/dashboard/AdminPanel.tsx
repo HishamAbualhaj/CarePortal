@@ -87,18 +87,6 @@ function AdminPanel({
                 />
               </div>
             )}
-
-            <div className="pb-5 mt-5 flex gap-2 items-center">
-              <div className="tex">Show</div>
-              <select className="!px-4 !w-fit" name="" id="">
-                {[1, 2, 3, 4, 5, 10, 15, 20].map((i) => (
-                  <option key={i} value={i}>
-                    {i}
-                  </option>
-                ))}
-              </select>
-              <div className="tex">entries</div>
-            </div>
             <div className="overflow-auto h-[500px]">
               <Table
                 columns={columns}
