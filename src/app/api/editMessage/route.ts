@@ -5,7 +5,7 @@ import withAuth from "@/lib/withAuth";
 export async function PUT(req: NextRequest) {
   try {
     return withAuth(req, async (user, req) => {
-      if (user.role !== "admin") {
+      if (user.role !== "admin" && user.role !== "doctor") {
         return NextResponse.json(
           {
             status: false,
