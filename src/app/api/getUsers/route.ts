@@ -1,10 +1,7 @@
 import { adminDB } from "@/firebase/adminConfig";
 import { NextResponse, NextRequest } from "next/server";
 import withAuth from "@/lib/withAuth";
-import {
-  type Query,
-  type DocumentData,
-} from "firebase-admin/firestore";
+import { type Query, type DocumentData } from "firebase-admin/firestore";
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,11 +28,9 @@ export async function POST(req: NextRequest) {
 
       const snapshot = await queryRef.get();
 
-      const userData = snapshot?.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      console.log("data from user", userData);
+      const userData = snapshot?.docs
+        .filter((doc) => doc.data().role !== "admin")
+        .map((doc) => ({ id: doc.id, ...doc.data() }));
       return NextResponse.json({ status: true, msg: userData });
     });
   } catch (error) {
