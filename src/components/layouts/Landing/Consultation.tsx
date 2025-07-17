@@ -24,7 +24,7 @@ function Consultation() {
   const { data } = useQuery({
     queryKey: ["doctors"],
     queryFn: async () => {
-      return await useFetch("/api/getDoctors", "GET", {}, userToken);
+      return await useFetch("/api/getDoctors", "POST", {}, userToken);
     },
     enabled: !!userToken,
   });
@@ -86,6 +86,7 @@ function Consultation() {
         </div>
 
         <div className="flex flex-col gap-2 flex-1">
+          {userToken ? "" : <div className="border p-2 border-gray-300 text-blue-500 bg-white">Login to send consultation</div> }
           <div className="flex gap-2 max-md:flex-col">
             <select
               onChange={handleChange}
@@ -94,6 +95,7 @@ function Consultation() {
               id="doctor_id"
             >
               <option value="">Select Doctor</option>
+
               {typeof data?.msg === "string"
                 ? ""
                 : data?.msg.map((item: Record<string, any>, i: number) => (
