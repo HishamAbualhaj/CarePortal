@@ -1,7 +1,6 @@
 import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { Dispatch, SetStateAction } from "react";
-import { formData } from "@/app/admin/users/ClientUsers";
 import { PopupProps } from "@/types/AdminPanelProps";
 
 interface ComponentProps {
