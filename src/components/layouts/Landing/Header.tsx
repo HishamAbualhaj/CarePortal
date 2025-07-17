@@ -59,9 +59,7 @@ function Header() {
     },
   ];
   const data = useContext(AuthContext);
-  useEffect(() => {
-    console.log("data", data?.user);
-  }, [data]);
+
   const [navs, setNavs] = useState<navsType>(arr);
 
   const [activeNav, setActiveNav] = useState<boolean>(false);

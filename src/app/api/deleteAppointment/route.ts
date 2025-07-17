@@ -1,4 +1,4 @@
-import { adminDB, adminAuth } from "@/firebase/adminConfig";
+import { adminDB } from "@/firebase/adminConfig";
 import withAuth from "@/lib/withAuth";
 import { NextRequest, NextResponse } from "next/server";
 
