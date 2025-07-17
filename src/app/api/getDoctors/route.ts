@@ -6,15 +6,7 @@ export async function POST(req: NextRequest) {
   try {
     return withAuth(req, async (user, req) => {
       const body = await req.json();
-      if (user.role !== "admin") {
-        return NextResponse.json(
-          {
-            status: false,
-            msg: "Authentication credentials are wrong",
-          },
-          { status: 401 }
-        );
-      }
+  
       let queryRef: Query<DocumentData> = adminDB.collection("doctors");
 
       if (body?.name) {
