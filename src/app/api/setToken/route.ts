@@ -6,25 +6,34 @@ export async function POST(req: NextRequest) {
 
   try {
     let tokenAge = 60 * 60 * 24 * 7; // 7 days
-    const userData = await adminAuth.verifyIdToken(body?.token);
+    const userDataFromToken = await adminAuth.verifyIdToken(body?.token);
     if (body?.type === "unset") {
       tokenAge = 0;
       await adminDB
-        .collection(`${userData?.role === "doctor" ? "doctors" : "users"}`)
-        .doc(userData.uid)
+        .collection(
+          `${userDataFromToken?.role === "doctor" ? "doctors" : "users"}`
+        )
+        .doc(userDataFromToken.uid)
         .update({
           status: false,
         });
     } else {
       await adminDB
-        .collection(`${userData?.role === "doctor" ? "doctors" : "users"}`)
-        .doc(userData.uid)
+        .collection(
+          `${userDataFromToken?.role === "doctor" ? "doctors" : "users"}`
+        )
+        .doc(userDataFromToken.uid)
         .update({
           status: true,
         });
     }
-    await adminAuth.verifyIdToken(body?.token);
 
+    const userData = await adminDB
+      .collection(
+        `${userDataFromToken?.role === "doctor" ? "doctors" : "users"}`
+      )
+      .doc(userDataFromToken.uid)
+      .get();
     (await cookies()).set({
       name: "token",
       value: body?.token,
@@ -34,7 +43,7 @@ export async function POST(req: NextRequest) {
       maxAge: tokenAge,
     });
 
-    return NextResponse.json({ status: "success", msg: userData });
+    return NextResponse.json({ status: "success", msg: userData.data() });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
