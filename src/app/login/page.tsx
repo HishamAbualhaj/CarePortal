@@ -1,6 +1,5 @@
 "use client";
 import Button from "@/components/ui/Button";
-
 import { auth } from "@/firebase/config";
 import { useMutation } from "@tanstack/react-query";
 import { FirebaseError } from "firebase/app";
@@ -9,6 +8,7 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
+import useFetch from "@/hooks/useFetch";
 function page() {
   const router = useRouter();
   const inputs = [
@@ -22,8 +22,24 @@ function page() {
 
   const login = async () => {
     try {
-      await signInWithEmailAndPassword(auth, userData.email, userData.password);
-      return { message: "Login successfully", status: true };
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        userData.email,
+        userData.password
+      );
+
+      const token = await userCredential.user.getIdToken();
+
+      const userDataAfterLogin = await useFetch("/api/setToken", "POST", {
+        token,
+        type: "set",
+      });
+
+      return {
+        message: "Login successfully",
+        status: true,
+        userDataAfterLogin,
+      };
     } catch (error) {
       if (error instanceof FirebaseError) {
         if (error.code === "auth/invalid-credential") {
@@ -36,8 +52,21 @@ function page() {
   const { mutate, data, isPending } = useMutation({
     mutationKey: ["authUser"],
     mutationFn: login,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data?.status) {
+        const user = data.userDataAfterLogin?.msg;
+        if (typeof user !== "string" && user?.role !== "user") {
+          if (user?.role === "admin") {
+            router.push("/admin/users");
+            return;
+          }
+          if (user?.role === "doctor") {
+            router.push("/admin/appointments");
+            return;
+          }
+          router.push("/");
+        }
+
         toast.success(data.message);
         return;
       }
@@ -54,16 +83,6 @@ function page() {
     setUserData((prev) => ({ ...prev, [id]: value }));
   };
 
-  useEffect(() => {
-    if (data?.status) {
-      toast.success(data.message);
-      {
-        data.status && router.push("/");
-      }
-      return;
-    }
-    toast.error(data?.message);
-  }, [data]);
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
@@ -111,7 +130,7 @@ function page() {
 
               <div className="mt-3">
                 {isPending ? (
-                  <Button text="Loading" />
+                  <Button text="Loading ..." />
                 ) : (
                   <Button onClick={mutate} text="Login" />
                 )}

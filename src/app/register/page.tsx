@@ -4,7 +4,10 @@ import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import useFetch from "@/hooks/useFetch";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
 import { auth } from "@/firebase/config";
 import { createDataDoc } from "@/firebase/db";
 import { FirebaseError } from "firebase/app";
@@ -43,7 +46,6 @@ function page() {
     confirmpass: null,
     address: "",
     status: true,
-    isVerified: false,
     role: "user",
   });
 
@@ -55,11 +57,16 @@ function page() {
         userData.email,
         userData.password
       );
-      const id = await createDataDoc({
+      await createDataDoc({
         data: cleanedUserData,
         docName: "users",
         id: userCredential.user.uid,
       });
+      const token = userCredential.user.getIdToken();
+
+      await useFetch("/api/setToken", "POST", { token, type: "set" });
+
+      await sendEmailVerification(userCredential.user);
 
       return { message: "Signup successfully", status: true };
     } catch (error) {
@@ -131,7 +138,7 @@ function page() {
     if (data?.status) {
       toast.success(data.message);
       {
-        data.status && router.push("/");
+        data.status && router.push("/verifycode");
       }
       return;
     }
@@ -190,7 +197,7 @@ function page() {
 
               <div className="mt-3">
                 {isPending ? (
-                  <Button text="Loading" />
+                  <Button text="Loading ..." />
                 ) : (
                   <Button onClick={mutate} text="Create account" />
                 )}

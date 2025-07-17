@@ -1,19 +1,20 @@
 "use client";
 import React, { useContext, useEffect, useState } from "react";
 import { signOut } from "firebase/auth";
-import { auth, db } from "@/firebase/config";
-import { doc, updateDoc } from "firebase/firestore";
+import { auth } from "@/firebase/config";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "@/context/AuthContextUser";
+import useFetch from "@/hooks/useFetch";
 function page() {
   const router = useRouter();
   const data = useContext(AuthContext);
   const [isLogout, setIsLogOut] = useState<boolean | string>(false);
   const handleLogout = async () => {
     try {
-      if (auth.currentUser) {
-        await updateDoc(doc(db, "users", auth.currentUser.uid), {
-          status: false,
+      if (data?.user?.token) {
+        await useFetch("/api/setToken", "POST", {
+          token: data?.user?.token,
+          type: "unset",
         });
       }
       await signOut(auth);
