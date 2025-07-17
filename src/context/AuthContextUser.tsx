@@ -1,5 +1,5 @@
 "use client";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, User } from "firebase/auth";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { createContext } from "react";
 import { auth, db } from "@/firebase/config";
@@ -10,16 +10,15 @@ interface Props {
 }
 export type UserProfile = {
   uid: string;
+  image_url: string;
+  name: string;
+  mobile: string;
+  email: string;
   address: string;
   date: string;
-  email: string;
-  status: true;
-  image_url: string;
-  isVerified: boolean;
-  mobile: string;
-  name: string;
+  status: string;
   role: string;
-  token: string;
+  token?: string;
 };
 export type AuthContextType = {
   user: UserProfile | null;
@@ -34,15 +33,17 @@ function AuthContextUser({ children }: Props) {
     const authChange = onAuthStateChanged(auth, async (user) => {
       if (user) {
         const token = await auth.currentUser?.getIdToken();
-        const userRef = doc(db, "users", user?.uid);
-        const snap = await getDoc(userRef);
-        if (snap.exists()) {
-          const newUser = { uid: user?.uid, ...snap.data(), token };
-          await useFetch("/api/setToken", "POST", { token });
+        const userData = await useFetch("/api/setToken", "POST", {
+          token,
+          type: "set",
+        });
+        if (typeof userData.msg !== "string") {
+          const newUser = { uid: user?.uid, ...userData.msg, token };
           setUser(newUser as UserProfile);
-          setLoading(false);
-          return;
         }
+
+        setLoading(false);
+        return;
       }
       setLoading(false);
     });
