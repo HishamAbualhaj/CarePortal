@@ -8,7 +8,7 @@ import { formContact, Response } from "@/types/adminTypes";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import useFetch from "@/hooks/useFetch";
 import { toast, ToastContainer } from "react-toastify";
-import Link from "next/link";
+import DashoardHeader from "@/components/layouts/dashboard/DashoardHeader";
 function ClientContacts() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -90,9 +90,7 @@ function ClientContacts() {
       <ToastContainer position="top-right" autoClose={3000} />
       <SideBar />
       <div className="flex-1 w-full bg-secondary">
-        <div className="bg-white py-3 flex justify-end px-5 shadow-main">
-          <Link className="border p-2 px-5 rounded-md bg-blue-600 text-white transition hover:bg-blue-400" href="/logout">Logout</Link>
-        </div>
+        <DashoardHeader name={user?.user?.name ?? ""} />
         <div className="mt-5">
           {isFetching && (
             <div className="py-2 xl:px-10 px-5 text-xl animate-pulse">

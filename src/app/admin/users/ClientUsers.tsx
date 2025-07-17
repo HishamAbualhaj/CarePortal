@@ -21,6 +21,7 @@ import { AuthContext } from "@/context/AuthContextUser";
 import { formUser as formData, FormItem } from "@/types/adminTypes";
 import { handleChange } from "../../../helpers/handleInputChange";
 import { Response } from "@/types/adminTypes";
+import DashoardHeader from "@/components/layouts/dashboard/DashoardHeader";
 
 function ClientUsers() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -210,7 +211,7 @@ function ClientUsers() {
       <ToastContainer position="top-right" autoClose={3000} />
       <SideBar />
       <div className="flex-1 w-full bg-secondary relative">
-        <div className="bg-white py-[34px] shadow-main"></div>
+        <DashoardHeader name={user?.user?.name ?? ""} />
         <div className="mt-5">
           {isFetchingData && (
             <div className="py-2 xl:px-10 px-5 text-xl animate-pulse">

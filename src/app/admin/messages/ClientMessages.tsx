@@ -2,6 +2,7 @@
 import { handleChange } from "../../../helpers/handleInputChange";
 import ActionButtons from "@/components/layouts/dashboard/ActionButtons";
 import AdminPanel from "@/components/layouts/dashboard/AdminPanel";
+import DashoardHeader from "@/components/layouts/dashboard/DashoardHeader";
 import SideBar from "@/components/layouts/dashboard/SideBar";
 import { AuthContext } from "@/context/AuthContextUser";
 import useFetch from "@/hooks/useFetch";
@@ -125,7 +126,7 @@ function ClientMessages() {
       <ToastContainer position="top-right" autoClose={3000} />
       <SideBar />
       <div className="flex-1 w-full bg-secondary">
-        <div className="bg-white py-[34px] shadow-main"></div>
+        <DashoardHeader name={user?.user?.name ?? ""} />
         <div className="mt-5">
           {isFetching && (
             <div className="py-2 xl:px-10 px-5 text-xl animate-pulse">
