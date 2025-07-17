@@ -52,7 +52,6 @@ export async function POST(req: NextRequest) {
         city: body?.city,
         country_graduation: body?.country_graduation,
         decs: body?.desc,
-        isVerified: false,
       });
       return NextResponse.json({
         status: true,

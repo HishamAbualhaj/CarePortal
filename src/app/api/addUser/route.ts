@@ -48,7 +48,6 @@ export async function POST(req: NextRequest) {
         status: "inactive",
         mobile: body?.mobile,
         diseases: body?.diseases,
-        isVerified: false,
       });
       return NextResponse.json({
         status: true,
