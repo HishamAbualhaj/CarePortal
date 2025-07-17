@@ -36,8 +36,19 @@ function page() {
   const updateUser = async (userData: Record<string, any>) => {
     try {
       if (dataContext?.user) {
-        const userRef = doc(db, "users", dataContext?.user?.uid);
-        await updateDoc(userRef, userData);
+        const userRef = doc(
+          db,
+          `${userData.role === "doctor" ? "doctors" : "users"}`,
+          dataContext?.user?.uid
+        );
+        await updateDoc(userRef, {
+          name: userData.name,
+          email: userData.email,
+          mobile: userData.mobile,
+          date: userData.date,
+          gender: userData.gender,
+          address: userData.address,
+        });
         return { message: "Profile updated successfully", status: true };
       }
       return null;
@@ -63,24 +74,28 @@ function page() {
     }
   }, [dataContext]);
 
+  useEffect(() => {
+    console.log("user data", userData);
+  }, [userData]);
+
   const inputs = [
     {
       id: "name",
       title: "Full Name:",
       type: "text",
-      data: dataContext?.user?.name,
+      data: userData.name ?? "",
     },
     {
       id: "mobile",
       title: "Phone:",
       type: "text",
-      data: dataContext?.user?.mobile,
+      data: userData.mobile ?? "",
     },
     {
       id: "date",
       title: "Birthday:",
-      type: "text",
-      data: dataContext?.user?.date,
+      type: "date",
+      data: userData.date ?? "",
     },
   ];
 
@@ -90,19 +105,19 @@ function page() {
       title: "Gender:",
       type: "select",
       options: ["Male", "Female"],
-      data: "",
+      data: userData.gender ?? "",
     },
     {
       id: "email",
       title: "Email:",
       type: "text",
-      data: dataContext?.user?.email,
+      data: userData.email ?? "",
     },
     {
       id: "address",
       title: "Address:",
       type: "text",
-      data: dataContext?.user?.address,
+      data: userData.address ?? "",
     },
   ];
 
@@ -275,7 +290,6 @@ function page() {
                       let newDataWithImageUrl = {};
                       if (userImage) {
                         const image_url = await useUpload(userImage);
-                        console.log("Image url", image_url);
                         newDataWithImageUrl = {
                           ...userData,
                           image_url,
@@ -314,7 +328,7 @@ function page() {
                       <input
                         id={input.id}
                         onChange={handleChange}
-                        value={userData[input.id]}
+                        value={userData[input.id] ?? ""}
                         type={input.type}
                       />
                     </div>
@@ -328,7 +342,7 @@ function page() {
                       {input.type === "select" ? (
                         <select
                           onChange={handleChange}
-                          value={userData[input.id]}
+                          value={userData[input.id] ?? ""}
                           id={input.id}
                         >
                           {input.options?.map((option, i) => (
@@ -341,7 +355,7 @@ function page() {
                         <input
                           id={input.id}
                           onChange={handleChange}
-                          value={userData[input.id]}
+                          value={userData[input.id] ?? ""}
                           type={input.type}
                         />
                       )}
