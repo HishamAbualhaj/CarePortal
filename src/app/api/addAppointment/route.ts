@@ -5,7 +5,7 @@ import withAuth from "@/lib/withAuth";
 export async function POST(req: NextRequest) {
   try {
     return withAuth(req, async (user, req) => {
-      if (user.role !== "admin") {
+      if (user.role !== "admin" && user.role !== "doctor") {
         return NextResponse.json(
           {
             status: false,
@@ -16,7 +16,9 @@ export async function POST(req: NextRequest) {
       }
       const body = await req.json();
 
-      await adminDB.collection("appointment").add({...body, status:"available"});
+      await adminDB
+        .collection("appointment")
+        .add({ ...body, status: "available" });
       return NextResponse.json({
         status: true,
         msg: "Appointment created successfully",

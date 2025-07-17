@@ -236,6 +236,10 @@ function ClientAppointments() {
                       }
                       data={item as formAppointment}
                       setData={setEditAppointment}
+                      user_data={{
+                        role: user?.user?.role ?? "",
+                        doctor_id: user?.user?.uid ?? "",
+                      }}
                     />
                   ),
                   popupActionText: "Edit",
@@ -258,6 +262,10 @@ function ClientAppointments() {
                     }
                     data={addAppointment}
                     setData={setAddAppointment}
+                    user_data={{
+                      role: user?.user?.role ?? "",
+                      doctor_id: user?.user?.uid ?? "",
+                    }}
                   />
                 ),
                 popupActionText: `${add.isPending ? "Loading ..." : "Add"}`,
@@ -287,89 +295,140 @@ function ClientAppointments() {
     </div>
   );
 }
+const Items: FormItem<formAppointment, keyof formAppointment>[] = [
+  {
+    key: "doctor_id",
+    text: "Doctor",
+    item: (inputData: string, handleChange, data) => (
+      <select
+        id="doctor_id"
+        onChange={handleChange}
+        value={inputData}
+        className="bg-gray-100 border-none"
+      >
+        <option value="">Select Doctor</option>
+        {data?.map((item, i) => (
+          <option key={i} value={item.id}>
+            {item.name}
+          </option>
+        ))}
+      </select>
+    ),
+  },
+  {
+    key: "date",
+    text: "Date",
+    item: (inputData: string, handleChange) => (
+      <input
+        id="date"
+        onChange={handleChange}
+        value={inputData}
+        className="bg-gray-100 border-none"
+        type="date"
+        placeholder="Date of appointment"
+      />
+    ),
+  },
+  {
+    key: "time",
+    text: "Time",
+    item: (inputData: string, handleChange) => (
+      <input
+        id="time"
+        onChange={handleChange}
+        value={inputData}
+        className="bg-gray-100 border-none"
+        type="text"
+        placeholder="Date of appointment"
+      />
+    ),
+  },
+];
 
+const ItemsDoctor: FormItem<formAppointment, keyof formAppointment>[] = [
+  {
+    key: "date",
+    text: "Date",
+    item: (inputData: string, handleChange) => (
+      <input
+        id="date"
+        onChange={handleChange}
+        value={inputData}
+        className="bg-gray-100 border-none"
+        type="date"
+        placeholder="Date of appointment"
+      />
+    ),
+  },
+  {
+    key: "time",
+    text: "Time",
+    item: (inputData: string, handleChange) => (
+      <input
+        id="time"
+        onChange={handleChange}
+        value={inputData}
+        className="bg-gray-100 border-none"
+        type="text"
+        placeholder="Date of appointment"
+      />
+    ),
+  },
+];
 const AddItems = ({
   data,
   setData,
   doctorData,
+  user_data,
 }: {
   data: formAppointment | Record<string, any>;
   setData: Dispatch<SetStateAction<formAppointment | Record<string, any>>>;
   doctorData?: Record<string, any>[];
+  user_data: { role: string; doctor_id: string };
 }) => {
-  const Items: FormItem<formAppointment, keyof formAppointment>[] = [
-    {
-      key: "doctor_id",
-      text: "Doctor",
-      item: (inputData: string, handleChange, data) => (
-        <select
-          id="doctor_id"
-          onChange={handleChange}
-          value={inputData}
-          className="bg-gray-100 border-none"
-        >
-          <option value="">Select Doctor</option>
-          {data?.map((item, i) => (
-            <option key={i} value={item.id}>
-              {item.name}
-            </option>
-          ))}
-        </select>
-      ),
-    },
-    {
-      key: "date",
-      text: "Date",
-      item: (inputData: string, handleChange) => (
-        <input
-          id="date"
-          onChange={handleChange}
-          value={inputData}
-          className="bg-gray-100 border-none"
-          type="date"
-          placeholder="Date of appointment"
-        />
-      ),
-    },
-    {
-      key: "time",
-      text: "Time",
-      item: (inputData: string, handleChange) => (
-        <input
-          id="time"
-          onChange={handleChange}
-          value={inputData}
-          className="bg-gray-100 border-none"
-          type="text"
-          placeholder="Date of appointment"
-        />
-      ),
-    },
-  ];
-
   const [formData, setFormData] = useState<
     formAppointment | Record<string, any>
   >(data);
   useEffect(() => {
     setData(formData);
+    if (user_data.role === "doctor") {
+      setData((prev) => ({ ...prev, doctor_id: user_data.doctor_id }));
+    }
   }, [formData]);
 
   return (
     <>
-      {Items?.map((item, i) => (
-        <div key={i} className="flex items-center py-4 gap-4 justify-between">
-          <div className="text-gray-700">{item.text}</div>
-          <div className="flex-1 md:min-w-[400px] max-w-[400px]">
-            {item.item(
-              formData[item.key] || "",
-              (e) => {
-                handleChange(e, setFormData);
-              },
-              doctorData
-            )}
-          </div>
-        </div>
-      ))}
+      {user_data.role === "doctor"
+        ? ItemsDoctor?.map((item, i) => (
+            <div
+              key={i}
+              className="flex items-center py-4 gap-4 justify-between"
+            >
+              <div className="text-gray-700">{item.text}</div>
+              <div className="flex-1 md:min-w-[400px] max-w-[400px]">
+                {item.item(formData[item.key] || "", (e) => {
+                  handleChange(e, setFormData);
+                })}
+              </div>
+            </div>
+          ))
+        : Items?.map((item, i) => (
+            <div
+              key={i}
+              className="flex items-center py-4 gap-4 justify-between"
+            >
+              <div className="text-gray-700">{item.text}</div>
+              <div className="flex-1 md:min-w-[400px] max-w-[400px]">
+                {item.item(
+                  formData[item.key] || "",
+                  (e) => {
+                    handleChange(e, setFormData);
+                  },
+                  doctorData
+                )}
+              </div>
+            </div>
+          ))}
     </>
   );
 };
@@ -378,82 +437,55 @@ const EditItems = ({
   data,
   setData,
   doctorData,
+  user_data,
 }: {
   data: formAppointment | Record<string, any>;
   setData: Dispatch<SetStateAction<formAppointment | Record<string, any>>>;
   doctorData?: Record<string, any>[];
+  user_data: { role: string; doctor_id: string };
 }) => {
-  const Items: FormItem<formAppointment, keyof formAppointment>[] = [
-    {
-      key: "doctor_id",
-      text: "Doctor",
-      item: (inputData: string, handleChange, data) => (
-        <select
-          id="doctor_id"
-          onChange={handleChange}
-          value={inputData}
-          className="bg-gray-100 border-none"
-        >
-          <option value="">Select Doctor</option>
-          {data?.map((item, i) => (
-            <option key={i} value={item.id}>
-              {item.name}
-            </option>
-          ))}
-        </select>
-      ),
-    },
-    {
-      key: "date",
-      text: "Date",
-      item: (inputData: string, handleChange) => (
-        <input
-          id="date"
-          onChange={handleChange}
-          value={inputData}
-          className="bg-gray-100 border-none"
-          type="date"
-          placeholder="Date of appointment"
-        />
-      ),
-    },
-    {
-      key: "time",
-      text: "Time",
-      item: (inputData: string, handleChange) => (
-        <input
-          id="time"
-          onChange={handleChange}
-          value={inputData}
-          className="bg-gray-100 border-none"
-          type="text"
-          placeholder="Date of appointment"
-        />
-      ),
-    },
-  ];
   const [formData, setFormData] = useState<
     formAppointment | Record<string, any>
   >(data);
   useEffect(() => {
     setData(formData);
+    if (user_data.role === "doctor") {
+      setData((prev) => ({ ...prev, doctor_id: user_data.doctor_id }));
+    }
   }, [formData]);
   return (
     <>
-      {Items?.map((item, i) => (
-        <div key={i} className="flex items-center py-4 gap-4 justify-between">
-          <div className="text-gray-700">{item.text}</div>
-          <div className="flex-1 md:min-w-[400px] max-w-[400px]">
-            {item.item(
-              formData[item.key] || "",
-              (e) => {
-                handleChange(e, setFormData);
-              },
-              doctorData
-            )}
-          </div>
-        </div>
-      ))}
+      {user_data.role === "doctor"
+        ? ItemsDoctor?.map((item, i) => (
+            <div
+              key={i}
+              className="flex items-center py-4 gap-4 justify-between"
+            >
+              <div className="text-gray-700">{item.text}</div>
+              <div className="flex-1 md:min-w-[400px] max-w-[400px]">
+                {item.item(formData[item.key] || "", (e) => {
+                  handleChange(e, setFormData);
+                })}
+              </div>
+            </div>
+          ))
+        : Items?.map((item, i) => (
+            <div
+              key={i}
+              className="flex items-center py-4 gap-4 justify-between"
+            >
+              <div className="text-gray-700">{item.text}</div>
+              <div className="flex-1 md:min-w-[400px] max-w-[400px]">
+                {item.item(
+                  formData[item.key] || "",
+                  (e) => {
+                    handleChange(e, setFormData);
+                  },
+                  doctorData
+                )}
+              </div>
+            </div>
+          ))}
     </>
   );
 };
