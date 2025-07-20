@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+body {
+  font-family: "Montserrat", sans-serif;
+}
+
+@theme {
+  --color-secondary: #eff6ff;
+  --shadow-main: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+
+}
+
+input,
+textarea {
+  @apply border border-gray-300 focus:outline-0 focus:border-blue-400  p-2 rounded-md placeholder:text-[15px] w-full;
+}
+
+select {
+  @apply focus:outline-none border border-gray-300 rounded-md p-2 w-full;
+}
+
+.max-container {
+  @apply max-w-[1280px] mx-auto;
+}
+.swiper {
+  position: static !important;
+}
+.custom-next {
+  top: 50%;
+  transform: translateY(-50%);
+  position: absolute;
+}
+
+.custom-prev {
+  top: 50%;
+  transform: translateY(-50%);
+  position: absolute;
+}
+
+.custom-next,
+.custom-prev {
+  @apply p-3 bg-blue-400 rounded-md text-white cursor-pointer hover:bg-blue-300;
+}
