@@ -10,12 +10,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-type Props = {
+interface PageProps {
   params: {
     id: string;
   };
-};
-async function Page({ params }: Props) {
+}
+async function Page({ params }: PageProps) {
   const { id } = params;
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/getDoctorId`,
