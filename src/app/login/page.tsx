@@ -9,6 +9,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import useFetch from "@/hooks/useFetch";
+import { baseURL } from "@/helpers/getApiUrl";
 function page() {
   const router = useRouter();
   const inputs = [
@@ -30,7 +31,7 @@ function page() {
 
       const token = await userCredential.user.getIdToken();
 
-      const userDataAfterLogin = await useFetch("/api/setToken", "POST", {
+      const userDataAfterLogin = await useFetch(`${baseURL}/api/setToken`, "POST", {
         token,
         type: "set",
       });

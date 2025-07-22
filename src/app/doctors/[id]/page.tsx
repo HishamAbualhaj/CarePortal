@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { baseURL } from "@/helpers/getApiUrl";
 interface PageProps {
   params: Promise<{
     id: string;
@@ -17,7 +18,7 @@ interface PageProps {
 async function Page({ params }: PageProps) {
   const { id } = await params;
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/getDoctorId`,
+    `${baseURL}/api/getDoctorId`,
     {
       method: "POST",
       headers: {

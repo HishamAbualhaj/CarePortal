@@ -17,6 +17,7 @@ import { Response } from "@/types/adminTypes";
 import { toast, ToastContainer } from "react-toastify";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import DashoardHeader from "@/components/layouts/dashboard/DashoardHeader";
+import { baseURL } from "@/helpers/getApiUrl";
 function ClientAppointments() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -84,7 +85,7 @@ function ClientAppointments() {
     token: string
   ): Promise<Response> => {
     return await useFetch(
-      "/api/addAppointment",
+      `${baseURL}/api/addAppointment`,
       "POST",
       {
         ...addAppointment,
@@ -98,7 +99,7 @@ function ClientAppointments() {
     token: string
   ): Promise<Response> => {
     return await useFetch(
-      "/api/editAppointment",
+      `${baseURL}/api/editAppointment`,
       "PUT",
       editAppointment,
       token
@@ -140,7 +141,7 @@ function ClientAppointments() {
     token: string
   ): Promise<Response> => {
     return await useFetch(
-      "/api/deleteAppointment",
+      `${baseURL}/api/deleteAppointment`,
       "DELETE",
       {
         ...dataForDelete,

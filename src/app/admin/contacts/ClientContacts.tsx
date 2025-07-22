@@ -9,6 +9,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import useFetch from "@/hooks/useFetch";
 import { toast, ToastContainer } from "react-toastify";
 import DashoardHeader from "@/components/layouts/dashboard/DashoardHeader";
+import { baseURL } from "@/helpers/getApiUrl";
 function ClientContacts() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -54,7 +55,7 @@ function ClientContacts() {
     token: string,
     data: formContact
   ) => {
-    return await useFetch("/api/deleteContact", "DELETE", data, token);
+    return await useFetch(`${baseURL}/api/deleteContact`, "DELETE", data, token);
   };
 
   const deleteMutation = useContactMutation(
@@ -72,7 +73,7 @@ function ClientContacts() {
     queryKey: ["contacts"],
     queryFn: async () => {
       return await useFetch(
-        "/api/getContact",
+        `${baseURL}/api/getContact`,
         "POST",
         { ...filterData },
         userToken

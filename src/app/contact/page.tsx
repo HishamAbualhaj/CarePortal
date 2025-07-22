@@ -9,6 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 import React, { useContext, useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { Response } from "@/types/adminTypes";
+import { baseURL } from "@/helpers/getApiUrl";
 function page() {
   const userContext = useContext(AuthContext);
   const [userData, setUserData] = useState<Record<string, any> | null>(null);
@@ -48,7 +49,7 @@ function page() {
     userData: Record<string, any> | null,
     contactData: Record<string, any>
   ): Promise<Response> => {
-    return await useFetch("/api/sendContact", "POST", {
+    return await useFetch(`${baseURL}/api/sendContact`, "POST", {
       ...userData,
       ...contactData,
     });

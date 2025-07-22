@@ -20,6 +20,7 @@ import useUpload from "@/hooks/useUpload";
 import { Response } from "@/types/adminTypes";
 import useFetch from "@/hooks/useFetch";
 import DashoardHeader from "@/components/layouts/dashboard/DashoardHeader";
+import { baseURL } from "@/helpers/getApiUrl";
 function ClientDoctors() {
   const user = useContext(AuthContext);
   const [userToken, setUserToken] = useState<string>("");
@@ -98,7 +99,7 @@ function ClientDoctors() {
   ): Promise<Response> => {
     const { confirmPassword, ...data } = addData;
     return await useFetch(
-      "/api/addDoctor",
+      `${baseURL}/api/addDoctor`,
       "POST",
       {
         ...data,
@@ -127,7 +128,7 @@ function ClientDoctors() {
     queryKey: ["doctors"],
     queryFn: async () => {
       return await useFetch(
-        "/api/getDoctors",
+        `${baseURL}/api/getDoctors`,
         "POST",
         { ...filterData },
         userToken

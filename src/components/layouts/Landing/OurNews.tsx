@@ -3,7 +3,7 @@ import Title from "../../ui/Title";
 import ImageFallBack from "@/components/ui/ImageFallBack";
 import Image from "next/image";
 import Link from "next/link";
-
+import { baseURL } from "@/helpers/getApiUrl";
 async function OurNews() {
   const news = [
     {
@@ -40,16 +40,13 @@ async function OurNews() {
     },
   ];
 
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/getRecentNews`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({}),
-    }
-  );
+  const res = await fetch(`${baseURL}/api/getRecentNews`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({}),
+  });
   const data = await res.json();
 
   return (

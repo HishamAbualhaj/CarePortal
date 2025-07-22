@@ -7,6 +7,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import useFetch from "@/hooks/useFetch";
 import { Response } from "@/types/adminTypes";
 import { toast, ToastContainer } from "react-toastify";
+import { baseURL } from "@/helpers/getApiUrl";
 function Consultation() {
   const userContext = useContext(AuthContext);
   const [userToken, setUserToken] = useState<string>("");
@@ -24,7 +25,7 @@ function Consultation() {
   const { data } = useQuery({
     queryKey: ["doctors"],
     queryFn: async () => {
-      return await useFetch("/api/getDoctors", "POST", {}, userToken);
+      return await useFetch(`${baseURL}/api/getDoctors`, "POST", {}, userToken);
     },
     enabled: !!userToken,
   });
@@ -35,7 +36,7 @@ function Consultation() {
     token: string
   ): Promise<Response> => {
     return await useFetch(
-      "/api/sendMessage",
+      `${baseURL}/api/sendMessage`,
       "POST",
       { ...userData, ...messageData },
       token

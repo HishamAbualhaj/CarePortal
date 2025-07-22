@@ -5,6 +5,7 @@ import { auth } from "@/firebase/config";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "@/context/AuthContextUser";
 import useFetch from "@/hooks/useFetch";
+import { baseURL } from "@/helpers/getApiUrl";
 function page() {
   const router = useRouter();
   const data = useContext(AuthContext);
@@ -12,7 +13,7 @@ function page() {
   const handleLogout = async () => {
     try {
       if (data?.user?.token) {
-        await useFetch("/api/setToken", "POST", {
+        await useFetch(`${baseURL}/api/setToken`, "POST", {
           token: data?.user?.token,
           type: "unset",
         });

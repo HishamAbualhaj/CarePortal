@@ -1,5 +1,6 @@
 import Header from "@/components/layouts/Landing/Header";
 import Image from "next/image";
+import { baseURL } from "@/helpers/getApiUrl";
 interface PageProps {
   params: Promise<{
     id: string;
@@ -7,7 +8,7 @@ interface PageProps {
 }
 async function Page({ params }: PageProps) {
   const { id } = await params;
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/getNewsId`, {
+  const res = await fetch(`${baseURL}/api/getNewsId`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

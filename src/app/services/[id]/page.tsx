@@ -5,7 +5,7 @@ import Link from "next/link";
 import React from "react";
 import { sections } from "@/lib/sectionsData";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-type Props = {
+type Props = { 
   params: Promise<{
     id: string;
   }>;

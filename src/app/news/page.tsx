@@ -2,6 +2,7 @@
 import Header from "@/components/layouts/Landing/Header";
 import ImageFallBack from "@/components/ui/ImageFallBack";
 import { AuthContext } from "@/context/AuthContextUser";
+import { baseURL } from "@/helpers/getApiUrl";
 import useFetch from "@/hooks/useFetch";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -18,10 +19,10 @@ function page() {
     setUserToken(user?.user?.token ?? "");
   }, [user]);
 
-  const { data, refetch } = useQuery({
+  const { data } = useQuery({
     queryKey: ["news"],
     queryFn: async () => {
-      return await useFetch("/api/getNews", "GET", {}, userToken);
+      return await useFetch(`${baseURL}/api/getNews`, "GET", {}, userToken);
     },
     enabled: !!userToken,
   });

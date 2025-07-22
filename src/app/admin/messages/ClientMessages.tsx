@@ -5,6 +5,7 @@ import AdminPanel from "@/components/layouts/dashboard/AdminPanel";
 import DashoardHeader from "@/components/layouts/dashboard/DashoardHeader";
 import SideBar from "@/components/layouts/dashboard/SideBar";
 import { AuthContext } from "@/context/AuthContextUser";
+import { baseURL } from "@/helpers/getApiUrl";
 import useFetch from "@/hooks/useFetch";
 import { FormItem, formMessage } from "@/types/adminTypes";
 import { Response } from "@/types/adminTypes";
@@ -74,14 +75,14 @@ function ClientMessages() {
     url: string | null,
     token: string
   ): Promise<Response> => {
-    return await useFetch("/api/editMessage", "PUT", editMessage, token);
+    return await useFetch(`${baseURL}/api/editMessage`, "PUT", editMessage, token);
   };
 
   const deleteMessageFn = async (
     url: string | null,
     token: string
   ): Promise<Response> => {
-    return await useFetch("/api/deleteMessage", "DELETE", {}, token);
+    return await useFetch(`${baseURL}/api/deleteMessage`, "DELETE", {}, token);
   };
   const edit = useMessageMutation(
     editMessageFn,
@@ -106,7 +107,7 @@ function ClientMessages() {
     queryKey: ["messages"],
     queryFn: async () => {
       return await useFetch(
-        "/api/getMessages",
+        `${baseURL}/api/getMessages`,
         "POST",
         { ...filterData },
         userToken

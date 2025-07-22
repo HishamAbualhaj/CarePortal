@@ -16,6 +16,7 @@ import useFetch from "@/hooks/useFetch";
 import ActionButtons from "@/components/layouts/dashboard/ActionButtons";
 import { formAppointment, formMessage } from "@/types/adminTypes";
 import { Response } from "@/types/adminTypes";
+import { baseURL } from "@/helpers/getApiUrl";
 function page() {
   const dataContext = useContext(AuthContext);
   const user = useContext(AuthContext);
@@ -125,7 +126,7 @@ function page() {
     queryKey: ["booked_appointments"],
     queryFn: async () => {
       return await useFetch(
-        "/api/getBookedAppointment",
+        `${baseURL}/api/getBookedAppointment`,
         "POST",
         {
           id: user?.user?.uid,
@@ -140,7 +141,7 @@ function page() {
     queryKey: ["mymessages"],
     queryFn: async () => {
       return await useFetch(
-        "/api/getMyMessages",
+        `${baseURL}/api/getMyMessages`,
         "POST",
         {
           id: user?.user?.uid,
@@ -178,7 +179,7 @@ function page() {
     token: string
   ): Promise<Response> => {
     return await useFetch(
-      "/api/deleteUserAppointment",
+      `${baseURL}/api/deleteUserAppointment`,
       "DELETE",
       {
         ...dataForDelete,
@@ -192,7 +193,7 @@ function page() {
     token: string
   ): Promise<Response> => {
     return await useFetch(
-      "/api/deleteUserMessage",
+      `${baseURL}/api/deleteUserMessage`,
       "DELETE",
       { ...dataForDelete },
       token

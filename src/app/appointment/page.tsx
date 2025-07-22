@@ -21,6 +21,7 @@ import { formAppointment, FormItem } from "@/types/adminTypes";
 import { handleChange } from "../../helpers/handleInputChange";
 import { Response } from "@/types/adminTypes";
 import { toast, ToastContainer } from "react-toastify";
+import { baseURL } from "@/helpers/getApiUrl";
 function page() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [pickData, setPickData] = useState({});
@@ -40,7 +41,7 @@ function page() {
     token: string
   ): Promise<Response> => {
     return await useFetch(
-      "/api/pickAppointment",
+      `${baseURL}/api/pickAppointment`,
       "POST",
       {
         ...pickData,
@@ -72,7 +73,7 @@ function page() {
   const { data, refetch } = useQuery({
     queryKey: ["appointments"],
     queryFn: async () => {
-      return await useFetch("/api/getAppointment", "POST", {}, userToken);
+      return await useFetch(`${baseURL}/api/getAppointment`, "POST", {}, userToken);
     },
     enabled: !!userToken,
   });

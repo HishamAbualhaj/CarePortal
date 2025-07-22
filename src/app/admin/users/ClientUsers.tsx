@@ -22,6 +22,7 @@ import { formUser as formData, FormItem } from "@/types/adminTypes";
 import { handleChange } from "../../../helpers/handleInputChange";
 import { Response } from "@/types/adminTypes";
 import DashoardHeader from "@/components/layouts/dashboard/DashoardHeader";
+import { baseURL } from "@/helpers/getApiUrl";
 
 function ClientUsers() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -111,7 +112,7 @@ function ClientUsers() {
   ): Promise<Response> => {
     const { confirmPassword, ...data } = addData;
     return await useFetch(
-      "/api/addUser",
+      `${baseURL}/api/addUser`,
       "POST",
       {
         ...data,
@@ -129,7 +130,7 @@ function ClientUsers() {
     if (url) {
       updatedData = { ...editData, image_url: url };
     }
-    return await useFetch("/api/editUser", "PUT", updatedData, token);
+    return await useFetch(`${baseURL}/api/editUser`, "PUT", updatedData, token);
   };
 
   const deleteUser = async (
@@ -138,7 +139,7 @@ function ClientUsers() {
   ): Promise<Response> => {
     await useUpload(dataForDelete.fileName, "delete");
     return await useFetch(
-      "/api/deleteUser",
+      `${baseURL}/api/deleteUser`,
       "DELETE",
       {
         ...dataForDelete,
@@ -191,7 +192,7 @@ function ClientUsers() {
     queryKey: ["users"],
     queryFn: async () => {
       return await useFetch(
-        "/api/getUsers",
+        `${baseURL}/api/getUsers`,
         "POST",
         { ...filterData },
         userToken

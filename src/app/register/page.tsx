@@ -13,6 +13,7 @@ import { createDataDoc } from "@/firebase/db";
 import { FirebaseError } from "firebase/app";
 import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
+import { baseURL } from "@/helpers/getApiUrl";
 function page() {
   const router = useRouter();
   const [inputs, setInputs] = useState<Record<string, any>[]>([
@@ -64,7 +65,7 @@ function page() {
       });
       const token = userCredential.user.getIdToken();
 
-      await useFetch("/api/setToken", "POST", { token, type: "set" });
+      await useFetch(`${baseURL}/api/setToken`, "POST", { token, type: "set" });
 
       await sendEmailVerification(userCredential.user);
 

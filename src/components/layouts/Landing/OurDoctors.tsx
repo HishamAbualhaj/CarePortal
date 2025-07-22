@@ -14,6 +14,7 @@ import "swiper/css/pagination";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { useQuery } from "@tanstack/react-query";
 import useFetch from "@/hooks/useFetch";
+import { baseURL } from "@/helpers/getApiUrl";
 function OurDoctors() {
   const doctorInfo = [
     {
@@ -116,7 +117,7 @@ function OurDoctors() {
   const { data } = useQuery({
     queryKey: ["ourdoctor"],
     queryFn: async () => {
-      return await useFetch("/api/getSearchDoctor", "POST", { limit: 4 });
+      return await useFetch(`${baseURL}/api/getSearchDoctor`, "POST", { limit: 4 });
     },
   });
 

@@ -21,6 +21,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import useUpload from "@/hooks/useUpload";
 import useFetch from "@/hooks/useFetch";
 import Link from "next/link";
+import { baseURL } from "@/helpers/getApiUrl";
 function ClientNews() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const user = useContext(AuthContext);
@@ -96,7 +97,7 @@ function ClientNews() {
     userData: Record<string, any>
   ): Promise<Response> => {
     return await useFetch(
-      "/api/addNews",
+      `${baseURL}/api/addNews`,
       "POST",
       {
         ...addData,
@@ -115,7 +116,7 @@ function ClientNews() {
     if (url) {
       updatedData = { ...editData, image_url: url };
     }
-    return await useFetch("/api/editNews", "PUT", updatedData, token);
+    return await useFetch(`${baseURL}/api/editNews`, "PUT", updatedData, token);
   };
 
   const add = useNewsMutation(
@@ -137,7 +138,7 @@ function ClientNews() {
     token: string
   ): Promise<Response> => {
     return await useFetch(
-      "/api/deleteNews",
+      `${baseURL}/api/deleteNews`,
       "DELETE",
       {
         ...dataForDelete,
@@ -165,7 +166,7 @@ function ClientNews() {
     queryKey: ["news"],
     queryFn: async () => {
       return await useFetch(
-        "/api/getNews",
+        `${baseURL}/api/getNews`,
         "POST",
         { ...filterData },
         userToken

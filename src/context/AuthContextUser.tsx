@@ -5,6 +5,7 @@ import { createContext } from "react";
 import { auth, db } from "@/firebase/config";
 import { doc, getDoc } from "firebase/firestore";
 import useFetch from "@/hooks/useFetch";
+import { baseURL } from "@/helpers/getApiUrl";
 interface Props {
   children: React.ReactNode;
 }
@@ -33,7 +34,7 @@ function AuthContextUser({ children }: Props) {
     const authChange = onAuthStateChanged(auth, async (user) => {
       if (user) {
         const token = await auth.currentUser?.getIdToken();
-        const userData = await useFetch("/api/setToken", "POST", {
+        const userData = await useFetch(`${baseURL}/api/setToken`, "POST", {
           token,
           type: "set",
         });

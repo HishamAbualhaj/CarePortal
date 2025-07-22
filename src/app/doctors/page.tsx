@@ -9,6 +9,7 @@ import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { useQuery } from "@tanstack/react-query";
 import useFetch from "@/hooks/useFetch";
 import Image from "next/image";
+import { baseURL } from "@/helpers/getApiUrl";
 function page() {
   const selectButton = [
     {
@@ -78,7 +79,7 @@ function page() {
   const { data, isLoading } = useQuery({
     queryKey: ["doctors", searchData],
     queryFn: async () => {
-      return await useFetch("/api/getSearchDoctor", "POST", searchData);
+      return await useFetch(`${baseURL}/api/getSearchDoctor`, "POST", searchData);
     },
   });
 
