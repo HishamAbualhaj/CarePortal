@@ -1,3 +1,4 @@
+
 import Header from "@/components/layouts/Landing/Header";
 import {
   faFacebook,
@@ -14,7 +15,7 @@ type Props = {
     id: string;
   };
 };
-async function page({ params }: Props) {
+async function Page({ params }: Props) {
   const { id } = params;
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/getDoctorId`,
@@ -100,4 +101,4 @@ async function page({ params }: Props) {
   );
 }
 
-export default page;
+export default Page;

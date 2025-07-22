@@ -1,8 +1,7 @@
-import Button from "@/components/ui/Button";
 import Link from "next/link";
 import React from "react";
 
-function page() {
+function Page() {
   return (
     <div className="h-screen bg-secondary flex justify-center items-center px-5">
       <div className="flex flex-col bg-white shadow-main max-w-[500px] text-black/70 p-5 rounded-md">
@@ -22,4 +21,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;
