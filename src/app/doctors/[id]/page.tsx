@@ -1,4 +1,3 @@
-
 import Header from "@/components/layouts/Landing/Header";
 import {
   faFacebook,
@@ -11,12 +10,12 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 async function Page({ params }: PageProps) {
-  const { id } = params;
+  const { id } = await params;
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/getDoctorId`,
     {

@@ -1,12 +1,12 @@
 import Header from "@/components/layouts/Landing/Header";
 import Image from "next/image";
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 async function Page({ params }: PageProps) {
-  const { id } = params;
+  const { id } = await params;
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/getNewsId`, {
     method: "POST",
     headers: {
@@ -21,9 +21,9 @@ async function Page({ params }: PageProps) {
       <div className="shadow-main">
         <Header />
       </div>
-       <div className="text-black/80 lg:py-[80px] py-[50px] bg-secondary font-bold text-2xl lg:pl-32 pl-10">
-          News Page
-        </div>
+      <div className="text-black/80 lg:py-[80px] py-[50px] bg-secondary font-bold text-2xl lg:pl-32 pl-10">
+        News Page
+      </div>
 
       <div className="max-container py-10 px-5 my-10">
         <div className="flex justify-between">

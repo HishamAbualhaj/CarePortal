@@ -6,12 +6,12 @@ import React from "react";
 import { sections } from "@/lib/sectionsData";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 type Props = {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 };
-function page({ params }: Props) {
-  const { id } = params;
+async function Page({ params }: Props) {
+  const { id } = await params;
 
   const items = [
     "A Passion for Healing",
@@ -44,7 +44,10 @@ function page({ params }: Props) {
                   } py-5 px-10 hover:bg-blue-200 flex gap-2 items-center`}
                   key={i}
                 >
-                  <FontAwesomeIcon className="text-cyan-500" icon={section.icon} />
+                  <FontAwesomeIcon
+                    className="text-cyan-500"
+                    icon={section.icon}
+                  />
                   {section.title}
                 </Link>
               ))}
@@ -76,4 +79,4 @@ function page({ params }: Props) {
   );
 }
 
-export default page;
+export default Page;
