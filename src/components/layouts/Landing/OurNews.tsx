@@ -3,7 +3,8 @@ import Title from "../../ui/Title";
 import ImageFallBack from "@/components/ui/ImageFallBack";
 import Image from "next/image";
 import Link from "next/link";
-import { baseURL } from "@/helpers/getApiUrl";
+import { getRecentNews } from "@/lib/getRecentNews";
+export const fetchCache = "force-cache";
 async function OurNews() {
   const news = [
     {
@@ -40,14 +41,7 @@ async function OurNews() {
     },
   ];
 
-  const res = await fetch(`${baseURL}/api/getRecentNews`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({}),
-  });
-  const data = await res.json();
+  const data = await getRecentNews();
 
   return (
     <div className="max-container px-5">
@@ -72,13 +66,13 @@ async function OurNews() {
                 key={i}
                 className="shadow-main flex items-start gap-2 border border-gray-200"
               >
-                {data.msg.image_url ? (
+                {item.image_url ? (
                   <Image
                     alt="News image"
                     width={500}
                     height={500}
                     className="w-full h-auto"
-                    src={data.msg.image_url}
+                    src={item.image_url}
                   />
                 ) : (
                   <ImageFallBack h="200px" />
