@@ -4,6 +4,7 @@ import ImageFallBack from "@/components/ui/ImageFallBack";
 import { AuthContext } from "@/context/AuthContextUser";
 import { baseURL } from "@/helpers/getApiUrl";
 import useFetch from "@/hooks/useFetch";
+import { Response } from "@/types/adminTypes";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
@@ -22,9 +23,8 @@ function page() {
   const { data } = useQuery({
     queryKey: ["news"],
     queryFn: async () => {
-      return await useFetch(`${baseURL}/api/getNews`, "GET", {}, userToken);
+      return await useFetch(`${baseURL}/api/getNews`, "POST", {});
     },
-    enabled: !!userToken,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,7 +35,7 @@ function page() {
   const { data: recentNews, isLoading } = useQuery({
     queryKey: ["recentnews", inputData],
     queryFn: async () => {
-      return await useFetch("/api/getRecentNews", "POST", {
+      return await useFetch(`${baseURL}/api/getRecentNews`, "POST", {
         search: inputData,
       });
     },
@@ -131,7 +131,7 @@ function page() {
                   <Link
                     className="hover:bg-gray-200/50 p-5 transition rounded-sn"
                     key={i}
-                    href="/"
+                    href={`/news/${news.id}`}
                   >
                     <div className="flex md:flex-row flex-col items-start gap-4 border-b border-gray-300 pb-3">
                       {news?.image_url ? (
